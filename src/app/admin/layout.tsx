@@ -5,7 +5,6 @@ import { requireSuperAdmin } from "@/lib/auth/guards";
 import { AdminShell } from "@/components/admin/admin-shell";
 
 /** The platform console reads the session and platform data at request time. */
-export const instant = false;
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const user = await requireSuperAdmin();

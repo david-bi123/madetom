@@ -7,7 +7,6 @@ import { ProductForm } from "@/components/products/product-form";
 import { Button } from "@/components/ui/button";
 
 /** This screen reads request-time data, so it is a blocking route. */
-export const instant = false;
 
 export default async function NewProductPage() {
   const context = await requireBusiness("products.manage");

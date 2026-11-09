@@ -13,7 +13,6 @@ import { Bell } from "lucide-react";
 import { markAllNotificationsRead, markNotificationRead } from "./actions";
 
 /** This screen reads request-time data, so it is a blocking route. */
-export const instant = false;
 
 const LEVEL_STYLES: Record<string, string> = {
   info: "bg-muted text-muted-foreground",

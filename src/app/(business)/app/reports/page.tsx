@@ -12,7 +12,6 @@ import { Download, FileText } from "lucide-react";
 import { CircleDollarSign, ClipboardCheck, ReceiptText } from "lucide-react";
 
 /** This screen reads request-time data, so it is a blocking route. */
-export const instant = false;
 
 export default async function ReportsPage() {
   const context = await requireBusiness("reports.view");

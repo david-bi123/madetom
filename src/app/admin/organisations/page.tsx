@@ -10,7 +10,6 @@ import { CreateOrganisationForm } from "@/components/admin/create-organisation-f
 import { Building2 } from "lucide-react";
 
 /** This screen reads request-time data, so it is a blocking route. */
-export const instant = false;
 
 export default async function AdminOrganisationsPage() {
   await requireSuperAdmin();

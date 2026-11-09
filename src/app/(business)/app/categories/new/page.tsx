@@ -4,7 +4,6 @@ import { CategoryForm } from "@/components/categories/category-form";
 import { Button } from "@/components/ui/button";
 
 /** This screen reads request-time data, so it is a blocking route. */
-export const instant = false;
 
 export default async function NewCategoryPage() {
   await requireBusiness("categories.manage");

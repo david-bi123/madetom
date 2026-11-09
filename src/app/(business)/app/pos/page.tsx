@@ -13,7 +13,6 @@ import { requireBusiness } from "@/lib/auth/guards";
 import { PosTerminal, type PosCategory, type PosCustomer, type PosProduct } from "@/components/pos/pos-terminal";
 
 /** This screen reads request-time data, so it is a blocking route. */
-export const instant = false;
 
 export default async function PosPage() {
   const context = await requireBusiness("pos.use");

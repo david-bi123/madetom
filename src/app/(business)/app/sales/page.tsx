@@ -11,7 +11,6 @@ import { ReceiptText } from "lucide-react";
 import Link from "next/link";
 
 /** This screen reads request-time data, so it is a blocking route. */
-export const instant = false;
 
 export default async function SalesPage() {
   const context = await requireBusiness("sales.view");

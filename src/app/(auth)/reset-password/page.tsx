@@ -5,7 +5,6 @@ import { ResetPasswordForm } from "@/components/auth/reset-password-form";
 import { FormSuccess } from "@/components/forms/field";
 
 /** This screen reads request-time data, so it is a blocking route. */
-export const instant = false;
 
 export const metadata: Metadata = {
   title: "Choose a new password",

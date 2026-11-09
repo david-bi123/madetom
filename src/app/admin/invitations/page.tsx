@@ -10,7 +10,6 @@ import { revokeInvitation } from "@/app/admin/actions";
 import { Mail, MailCheck, MailX } from "lucide-react";
 
 /** This screen reads request-time data, so it is a blocking route. */
-export const instant = false;
 
 export default async function AdminInvitationsPage() {
   await requireSuperAdmin();

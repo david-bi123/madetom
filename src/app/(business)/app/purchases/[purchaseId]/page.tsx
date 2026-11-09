@@ -11,9 +11,6 @@ import { StatusBadge } from "@/components/ui/status-badge";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 
-/** This screen reads request-time data, so it is a blocking route. */
-export const instant = false;
-
 export default async function PurchaseDetailPage({
   params,
 }: {

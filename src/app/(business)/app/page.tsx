@@ -36,7 +36,6 @@ import { StatusBadge } from "@/components/ui/status-badge";
 import { SalesChart, type SalesChartPoint } from "@/components/charts/sales-chart";
 
 /** The dashboard reads live tenant data, so it is a blocking route. */
-export const instant = false;
 
 const PAYMENT_LABELS: Record<string, string> = {
   cash: "Cash",

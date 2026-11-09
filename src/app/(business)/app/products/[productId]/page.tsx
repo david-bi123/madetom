@@ -7,9 +7,6 @@ import { ProductForm } from "@/components/products/product-form";
 import { VariantsManager } from "@/components/products/variants-manager";
 import { Button } from "@/components/ui/button";
 
-/** This screen reads request-time data, so it is a blocking route. */
-export const instant = false;
-
 type ProductEditPageProps = {
   params: Promise<{ productId: string }>;
 };

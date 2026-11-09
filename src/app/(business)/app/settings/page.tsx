@@ -7,7 +7,6 @@ import { BusinessSettingsForm } from "@/components/settings/business-settings-fo
 import { StatusBadge } from "@/components/ui/status-badge";
 
 /** This screen reads request-time data, so it is a blocking route. */
-export const instant = false;
 
 export default async function SettingsPage() {
   const context = await requireBusiness("settings.view");

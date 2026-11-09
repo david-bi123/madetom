@@ -3,7 +3,6 @@ import { FormPageHeader } from "@/components/forms/form-page-header";
 import { ExpenseForm } from "@/components/expenses/expense-form";
 
 /** This screen reads request-time data, so it is a blocking route. */
-export const instant = false;
 
 export default async function NewExpensePage() {
   const context = await requireBusiness("expenses.manage");

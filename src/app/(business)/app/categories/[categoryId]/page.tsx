@@ -6,9 +6,6 @@ import { requireBusiness } from "@/lib/auth/guards";
 import { CategoryForm } from "@/components/categories/category-form";
 import { Button } from "@/components/ui/button";
 
-/** This screen reads request-time data, so it is a blocking route. */
-export const instant = false;
-
 type CategoryEditPageProps = {
   params: Promise<{ categoryId: string }>;
 };

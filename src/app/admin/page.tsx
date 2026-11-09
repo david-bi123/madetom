@@ -11,7 +11,6 @@ import { Button } from "@/components/ui/button";
 import { Building2, CreditCard, Mail, MessageSquare } from "lucide-react";
 
 /** This screen reads request-time data, so it is a blocking route. */
-export const instant = false;
 
 export default async function AdminOverviewPage() {
   await requireSuperAdmin();

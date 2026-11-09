@@ -45,7 +45,6 @@ const ACCESS_MAILTO = `mailto:${CONTACT_EMAIL}?subject=Madetom access request&bo
 
 /** The landing page reads live plans and platform status from the database. */
 export const dynamic = "force-dynamic";
-export const instant = false;
 
 const capabilities = [
   {

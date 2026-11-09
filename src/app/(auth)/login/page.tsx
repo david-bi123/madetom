@@ -5,7 +5,6 @@ import { LoginForm } from "@/components/auth/login-form";
 import { FormSuccess } from "@/components/forms/field";
 
 /** This screen reads request-time data, so it is a blocking route. */
-export const instant = false;
 
 export const metadata: Metadata = {
   title: "Sign in",

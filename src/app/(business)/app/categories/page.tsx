@@ -11,7 +11,6 @@ import { Tags } from "lucide-react";
 import { deleteCategory } from "./actions";
 
 /** This screen reads request-time data, so it is a blocking route. */
-export const instant = false;
 
 type CategoriesPageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;

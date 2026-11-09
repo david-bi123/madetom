@@ -6,7 +6,6 @@ import { StaffInviteForm } from "@/components/staff/staff-invite-form";
 import { Button } from "@/components/ui/button";
 
 /** This screen reads request-time data, so it is a blocking route. */
-export const instant = false;
 
 export default async function InviteStaffPage() {
   const context = await requireBusiness("staff.manage");

@@ -11,9 +11,6 @@ import { Button } from "@/components/ui/button";
 import { SaleRefundButton } from "@/components/sales/sale-refund-button";
 import { Printer } from "lucide-react";
 
-/** This screen reads request-time data, so it is a blocking route. */
-export const instant = false;
-
 type SaleDetailPageProps = {
   params: Promise<{ saleId: string }>;
 };

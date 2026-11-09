@@ -23,9 +23,6 @@ import { Button } from "@/components/ui/button";
 import { setTenantStatus } from "@/app/admin/actions";
 import { ArrowLeft, Building2, MapPin, Phone, Wallet } from "lucide-react";
 
-/** This screen reads request-time data, so it is a blocking route. */
-export const instant = false;
-
 export default async function AdminOrganisationDetailPage({
   params,
 }: {

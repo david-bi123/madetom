@@ -11,7 +11,6 @@ import {
 } from "@/components/inventory/stock-action-forms";
 
 /** This screen reads request-time data, so it is a blocking route. */
-export const instant = false;
 
 export default async function TransferStockPage() {
   const context = await requireBusiness("inventory.transfer");

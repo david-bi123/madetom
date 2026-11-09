@@ -9,7 +9,6 @@ import { SmsCreditForm } from "@/components/admin/sms-credit-form";
 import { MessageSquare, Wallet } from "lucide-react";
 
 /** This screen reads request-time data, so it is a blocking route. */
-export const instant = false;
 
 export default async function AdminSmsPage() {
   await requireSuperAdmin();

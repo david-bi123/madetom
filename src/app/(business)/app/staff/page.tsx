@@ -6,7 +6,6 @@ import { StatusBadge } from "@/components/ui/status-badge";
 import { UserCog } from "lucide-react";
 
 /** This screen reads request-time data, so it is a blocking route. */
-export const instant = false;
 
 export default async function StaffPage() {
   const context = await requireBusiness("staff.view");

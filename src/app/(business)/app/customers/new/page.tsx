@@ -3,7 +3,6 @@ import { FormPageHeader } from "@/components/forms/form-page-header";
 import { CustomerForm } from "@/components/customers/customer-form";
 
 /** This screen reads request-time data, so it is a blocking route. */
-export const instant = false;
 
 export default async function NewCustomerPage() {
   await requireBusiness("customers.manage");

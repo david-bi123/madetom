@@ -9,9 +9,6 @@ import { formatMinor, formatMoney, toMinor } from "@/lib/format";
 import { Button } from "@/components/ui/button";
 import { PrintTrigger } from "@/components/sales/print-trigger";
 
-/** This screen reads request-time data, so it is a blocking route. */
-export const instant = false;
-
 export default async function PrintReceiptPage({
   params,
 }: {

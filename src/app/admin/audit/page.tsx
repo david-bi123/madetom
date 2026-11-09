@@ -7,7 +7,6 @@ import { PageHeader, EmptyState, StatCard } from "@/components/ui/page-header";
 import { FileClock } from "lucide-react";
 
 /** This screen reads request-time data, so it is a blocking route. */
-export const instant = false;
 
 export default async function AdminAuditPage() {
   await requireSuperAdmin();

@@ -11,7 +11,6 @@ import {
 } from "@/components/purchases/purchase-form";
 
 /** This screen reads request-time data, so it is a blocking route. */
-export const instant = false;
 
 export default async function NewPurchasePage() {
   const context = await requireBusiness("purchases.manage");

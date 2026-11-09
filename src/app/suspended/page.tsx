@@ -8,9 +8,6 @@ import { Logo } from "@/components/brand/logo";
 import { Button } from "@/components/ui/button";
 import { ShieldAlert } from "lucide-react";
 
-/** Reads the session cookie to work out which workspace was suspended. */
-export const instant = false;
-
 export default async function SuspendedPage() {
   const session = await getSession();
 

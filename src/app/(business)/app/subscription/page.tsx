@@ -11,7 +11,6 @@ import { Progress } from "@/components/ui/progress";
 import { CreditCard } from "lucide-react";
 
 /** This screen reads request-time data, so it is a blocking route. */
-export const instant = false;
 
 export default async function SubscriptionPage() {
   const context = await requireBusiness("subscription.view");

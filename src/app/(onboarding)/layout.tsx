@@ -6,7 +6,6 @@ const SUPPORT_EMAIL = process.env.NEXT_PUBLIC_SUPPORT_EMAIL ?? "support@madetom.
 const SUPPORT_LINK = `mailto:${SUPPORT_EMAIL}?subject=Madetom workspace setup`;
 
 /** Setup pages read the invitation token and session at request time. */
-export const instant = false;
 
 export default function OnboardingLayout({ children }: { children: React.ReactNode }) {
   return (

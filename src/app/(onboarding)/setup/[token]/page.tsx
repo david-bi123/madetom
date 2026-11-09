@@ -21,9 +21,6 @@ import {
 import { ROLE_CATALOG, isRoleKey } from "@/lib/permissions";
 import { formatDate } from "@/lib/dates";
 
-/** This screen reads request-time data, so it is a blocking route. */
-export const instant = false;
-
 export const metadata: Metadata = {
   title: "Set up your workspace",
   description: "Finish setting up your Madetom business workspace.",

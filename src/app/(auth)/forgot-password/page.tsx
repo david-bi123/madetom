@@ -4,7 +4,6 @@ import { ArrowLeft, MessageSquareText } from "lucide-react";
 import { ForgotPasswordForm } from "@/components/auth/forgot-password-form";
 
 /** This screen reads request-time data, so it is a blocking route. */
-export const instant = false;
 
 export const metadata: Metadata = {
   title: "Reset password",

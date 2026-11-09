@@ -9,7 +9,6 @@ import { getPlatformSettings } from "@/lib/platform-settings";
 import { Settings } from "lucide-react";
 
 /** This screen reads request-time data, so it is a blocking route. */
-export const instant = false;
 
 export default async function AdminSettingsPage() {
   await requireSuperAdmin();

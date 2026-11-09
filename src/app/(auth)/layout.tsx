@@ -6,7 +6,6 @@ import { Logo, LogoLockup } from "@/components/brand/logo";
  * Auth pages read the request (search params, session cookies) at request
  * time, so they cannot be prerendered into a static shell.
  */
-export const instant = false;
 
 const promises = [
   {

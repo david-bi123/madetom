@@ -15,7 +15,6 @@ import { Boxes, Download, Upload } from "lucide-react";
 import { archiveProduct } from "./actions";
 
 /** This screen reads request-time data, so it is a blocking route. */
-export const instant = false;
 
 type ProductsPageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;

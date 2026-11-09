@@ -10,7 +10,6 @@ import { AppShell } from "@/components/app/app-shell";
  * Every workspace screen reads the session cookie and the tenant's data at
  * request time, so the shell cannot be prerendered into a static shell.
  */
-export const instant = false;
 
 export default async function BusinessLayout({ children }: { children: React.ReactNode }) {
   const context = await requireBusiness();

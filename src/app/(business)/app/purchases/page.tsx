@@ -12,7 +12,6 @@ import { Button } from "@/components/ui/button";
 import { Plus, ShoppingBag } from "lucide-react";
 
 /** This screen reads request-time data, so it is a blocking route. */
-export const instant = false;
 
 export default async function PurchasesPage({
   searchParams,

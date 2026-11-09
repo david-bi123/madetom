@@ -64,8 +64,6 @@ export const viewport: Viewport = {
  * layout out of instant-navigation validation keeps the dev overlay (and the
  * console) free of blocking-route warnings for every page below it.
  */
-export const instant = false;
-
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html
