@@ -6,6 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { ArrowRight } from "lucide-react";
 import { setupSuperAdmin } from "@/app/setup-super-admin/actions";
+import { normalizePhone } from "@/lib/format";
 import { Field, FormError } from "@/components/forms/field";
 import { PasswordInput } from "@/components/auth/password-input";
 import { Button } from "@/components/ui/button";
@@ -15,7 +16,10 @@ const phoneSchema = z
   .string()
   .trim()
   .min(1, "Phone number is required.")
-  .refine((v) => /^\+\d{9,15}$/.test(v), "Enter a valid phone number, e.g. 055 062 4203.");
+  .refine((v) => {
+    const normalized = normalizePhone(v);
+    return /^\+\d{9,15}$/.test(normalized);
+  }, "Enter a valid phone number, e.g. 055 062 4203.");
 
 const schema = z
   .object({
