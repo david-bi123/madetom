@@ -69,47 +69,54 @@ export default async function LandingPage() {
 
       <main>
         {/* Hero */}
-        <section className="relative px-4 pt-12 pb-32 sm:px-6 sm:pt-16 sm:pb-40 lg:px-8">
-          <div className="page-container max-w-6xl mx-auto">
-            <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-              <div className="space-y-6">
-                <Badge variant="gold" className="inline-flex">
+        <section className="relative px-4 pt-12 pb-40 sm:px-6 sm:pt-16 sm:pb-48 lg:px-8 overflow-hidden">
+          <div className="absolute top-[-10%] left-[-10%] w-[600px] h-[600px] rounded-full bg-primary/8 blur-[120px] pointer-events-none" />
+          <div className="absolute bottom-[-10%] right-[-10%] w-[600px] h-[600px] rounded-full bg-[#e0bd66]/8 blur-[120px] pointer-events-none" />
+
+          <div className="page-container max-w-6xl mx-auto relative z-10">
+            <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-start">
+              <div className="space-y-8 lg:space-y-10">
+                <Badge variant="gold" className="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-semibold uppercase tracking-wider">
                   Built for Ghanaian shops
                 </Badge>
-                <h1 className="display-title text-[clamp(2.75rem,5vw,4.25rem)] leading-[1.05] text-ink mb-4">
-                  Your trade,<br />
-                  <span className="text-primary">under control.</span>
+                <h1 className="display-title text-[clamp(2.5rem,6vw,4.5rem)] leading-[1.02] text-ink mb-6 font-bold tracking-tight">
+                  Your shop,<br />
+                  <span className="text-primary">completely under control.</span>
                 </h1>
-                <p className="text-[16px] leading-relaxed text-muted-foreground max-w-lg">
-                  Point of sale, inventory and reporting in one calm system. Built for provision
-                  stores, supermarkets and shops across Ghana.
+                <p className="text-[17px] leading-relaxed text-muted-foreground max-w-lg mb-10">
+                  Point of sale, inventory tracking, staff management and SMS alerts in one calm
+                  system. Built for provision stores, supermarkets and shops across Ghana.
                 </p>
-                <Button size="lg" variant="gold" className="w-full sm:w-auto" render={<Link href="/login" />} nativeButton={false}>
-                  Sign in
-                  <ArrowRight className="size-4" />
-                </Button>
-                <p className="text-[12px] text-muted-foreground mt-2">
+                <div className="flex flex-col sm:flex-row gap-4">
+                  <Button size="lg" variant="gold" className="w-full sm:w-auto px-8 py-4 text-lg" render={<Link href="/login" />} nativeButton={false}>
+                    Sign in
+                    <ArrowRight className="size-5" />
+                  </Button>
+                  <Button size="lg" variant="outline" className="w-full sm:w-auto px-8 py-4 text-lg" render={<a href={ACCESS_MAILTO} />} nativeButton={false}>
+                    Request access
+                  </Button>
+                </div>
+                <p className="text-[12px] text-muted-foreground mt-4">
                   Access is by invitation — organisations are added by your Madetom administrator.
                 </p>
               </div>
 
-              <div className="relative h-[500px] lg:h-[600px]">
-                <div className="absolute -inset-1 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 blur-xl" />
-                <div className="relative rounded-2xl border border-border/60 bg-card overflow-hidden shadow-[var(--shadow-float)]">
+              <div className="relative h-[520px] lg:h-[650px] w-full max-w-[560px] mx-auto lg:mx-0">
+                <div className="absolute -inset-1 rounded-3xl bg-gradient-to-br from-primary/30 to-primary/10 blur-2xl" />
+                <div className="relative rounded-3xl border border-border/70 bg-card overflow-hidden shadow-2xl">
                   <img
                     src="https://getnovas.com/wp-content/uploads/2026/08/stock-count-doesnt-match-sales-records.png"
-                    alt="Ghanaian market seller arranging goods at her shop"
-                    className="w-full h-full object-cover"
+                    alt="Ghanaian shop owner at her store counter"
+                    className="w-full h-full object-cover object-center"
                     loading="lazy"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#14231c]/60 to-transparent" />
-                  <div className="absolute bottom-0 left-0 p-6 sm:p-8 w-full">
-                    <h3 className="font-heading text-[clamp(1.25rem,2vw,1.5rem)] font-semibold text-white tracking-tight">
-                      Adabraka Provisions
-                    </h3>
-                    <p className="mt-1 text-sm text-[#d9e1d7]">
-                      Accra, Ghana &bull; Open since 2018
-                    </p>
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#14231c]/50 via-[#14231c]/10 to-transparent" />
+                  <div className="absolute top-6 left-6 right-6 flex items-center justify-between">
+                    <span className="flex items-center gap-2 px-3 py-1 rounded-full bg-white/90 text-[#14231c] text-xs font-semibold">
+                      <span className="size-2 rounded-full bg-success" />
+                      Open since 2018
+                    </span>
+                    <span className="text-white text-sm font-medium">Accra, Ghana</span>
                   </div>
                 </div>
               </div>
