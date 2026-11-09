@@ -61,7 +61,7 @@ export default async function LandingPage() {
           <Link href="/" aria-label="Madetom home">
             <Logo />
           </Link>
-          <Button variant="ghost" size="sm" render={<Link href="/login" />} nativeButton={false}>
+          <Button variant="outline" size="sm" render={<Link href="/login" />} nativeButton={false}>
             Sign in
           </Button>
         </div>
@@ -69,7 +69,7 @@ export default async function LandingPage() {
 
       <main>
         {/* Hero */}
-        <section className="relative px-4 pt-20 pb-32 sm:px-6 sm:pt-32 sm:pb-40 lg:px-8">
+        <section className="relative px-4 pt-12 pb-32 sm:px-6 sm:pt-16 sm:pb-40 lg:px-8">
           <div className="page-container max-w-6xl mx-auto">
             <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
               <div className="space-y-6">
@@ -97,7 +97,7 @@ export default async function LandingPage() {
                 <div className="absolute -inset-1 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 blur-xl" />
                 <div className="relative rounded-2xl border border-border/60 bg-card overflow-hidden shadow-[var(--shadow-float)]">
                   <img
-                    src="https://images.unsplash.com/photo-1542838132-92c53300491e?q=80&w=1000&auto=format&fit=crop"
+                    src="https://getnovas.com/wp-content/uploads/2026/08/stock-count-doesnt-match-sales-records.png"
                     alt="Ghanaian market seller arranging goods at her shop"
                     className="w-full h-full object-cover"
                     loading="lazy"
