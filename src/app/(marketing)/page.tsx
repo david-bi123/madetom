@@ -100,22 +100,15 @@ export default async function LandingPage() {
 
               <div className="relative h-[520px] lg:h-[650px] w-full max-w-[560px] mx-auto lg:mx-0">
                 <div className="absolute -inset-1 rounded-3xl bg-gradient-to-br from-primary/30 to-primary/10 blur-2xl" />
-                <div className="relative rounded-3xl border border-border/70 bg-card overflow-hidden shadow-2xl">
-                  <img
-                    src="https://getnovas.com/wp-content/uploads/2026/08/stock-count-doesnt-match-sales-records.png"
-                    alt="Ghanaian shop owner at her store counter"
-                    className="w-full h-full object-cover object-center"
-                    loading="lazy"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#14231c]/50 via-[#14231c]/10 to-transparent" />
-                  <div className="absolute top-6 left-6 right-6 flex items-center justify-between">
-                    <span className="flex items-center gap-2 px-3 py-1 rounded-full bg-white/90 text-[#14231c] text-xs font-semibold">
-                      <span className="size-2 rounded-full bg-success" />
-                      Open since 2018
-                    </span>
-                    <span className="text-white text-sm font-medium">Accra, Ghana</span>
+                  <div className="relative rounded-3xl border border-border/70 bg-card overflow-hidden shadow-2xl">
+                    <img
+                      src="https://getnovas.com/wp-content/uploads/2026/08/stock-count-doesnt-match-sales-records.png"
+                      alt="Ghanaian shop owner at her store counter"
+                      className="w-full h-full object-cover object-center"
+                      loading="lazy"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#14231c]/50 to-transparent" />
                   </div>
-                </div>
               </div>
             </div>
           </div>
