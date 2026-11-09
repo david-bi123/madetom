@@ -61,7 +61,7 @@ export default async function LandingPage() {
           <Link href="/" aria-label="Madetom home">
             <Logo />
           </Link>
-          <Button variant="outline" size="sm" render={<Link href="/login" />} nativeButton={false}>
+          <Button variant="gold" size="sm" render={<Link href="/login" />} nativeButton={false}>
             Sign in
           </Button>
         </div>
@@ -91,9 +91,6 @@ export default async function LandingPage() {
                   <Button size="lg" variant="gold" className="w-full sm:w-auto px-8 py-4 text-lg" render={<Link href="/login" />} nativeButton={false}>
                     Sign in
                     <ArrowRight className="size-5" />
-                  </Button>
-                  <Button size="lg" variant="outline" className="w-full sm:w-auto px-8 py-4 text-lg" render={<a href={ACCESS_MAILTO} />} nativeButton={false}>
-                    Request access
                   </Button>
                 </div>
                 <p className="text-[12px] text-muted-foreground mt-4">
