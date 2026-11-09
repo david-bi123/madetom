@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { ShieldCheck } from "lucide-react";
 import { LoginForm } from "@/components/auth/login-form";
 import { FormSuccess } from "@/components/forms/field";
@@ -64,15 +63,9 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
           <div>
             <p className="text-[13px] font-semibold text-foreground">Access is by invitation</p>
             <p className="mt-1 text-[12.5px] leading-relaxed text-muted-foreground">
-              Business owners are onboarded by the Madetom team. Staff accounts are created inside
-              the workspace by an owner or manager.
+              Business owners are onboarded by the Madetom team via SMS invitation. Staff accounts
+              are created inside the workspace by an owner or manager.
             </p>
-            <Link
-              href="/#pricing"
-              className="mt-2 inline-flex rounded text-[12.5px] font-medium text-primary underline-offset-4 hover:underline"
-            >
-              See plans and request access
-            </Link>
           </div>
         </div>
       </div>
