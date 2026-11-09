@@ -1,0 +1,20 @@
+{
+  "version": "7",
+  "dialect": "mysql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "5",
+      "when": 1793907865258,
+      "tag": "0000_typical_cerebro",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1793951534015,
+      "tag": "0001_amazing_ego",
+      "breakpoints": true
+    }
+  ]
+}

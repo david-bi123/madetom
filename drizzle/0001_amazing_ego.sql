@@ -1,0 +1,1 @@
+ALTER TABLE `notification_preferences` ADD `sms_stock_adjustment` boolean DEFAULT false NOT NULL;
