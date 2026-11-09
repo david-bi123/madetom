@@ -61,44 +61,58 @@ export default async function LandingPage() {
           <Link href="/" aria-label="Madetom home">
             <Logo />
           </Link>
-          <div className="flex items-center gap-3">
-            <Button variant="ghost" size="sm" render={<Link href="/login" />} nativeButton={false}>
-              Sign in
-            </Button>
-            <Button
-              size="sm"
-              render={<a href={ACCESS_MAILTO} />}
-              nativeButton={false}>
-              Request access
-              <ArrowRight className="size-3.5" />
-            </Button>
-          </div>
+          <Button variant="ghost" size="sm" render={<Link href="/login" />} nativeButton={false}>
+            Sign in
+          </Button>
         </div>
       </header>
 
       <main>
         {/* Hero */}
-        <section className="relative px-4 py-20 sm:px-6 sm:py-32 lg:px-8">
-          <div className="page-container max-w-3xl text-center">
-            <Badge variant="gold" className="inline-block mb-6">
-              Built for Ghanaian shops
-            </Badge>
-            <h1 className="display-title text-[clamp(3rem,6vw,4.5rem)] text-ink mb-6">
-              Your trade,<br />
-              <span className="text-primary">under control.</span>
-            </h1>
-            <p className="text-[16px] leading-relaxed text-muted-foreground mb-10 max-w-2xl mx-auto">
-              Point of sale, inventory and reporting in one calm system. Built for provision
-              stores, shops and distributors across Ghana.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-3 justify-center">
-              <Button size="lg" variant="gold" className="w-full sm:w-auto" render={<a href={ACCESS_MAILTO} />} nativeButton={false}>
-                Request access
-                <ArrowRight className="size-4" />
-              </Button>
-              <Button size="lg" variant="outline" className="w-full sm:w-auto" render={<Link href="/login" />} nativeButton={false}>
-                Sign in
-              </Button>
+        <section className="relative px-4 pt-20 pb-32 sm:px-6 sm:pt-32 sm:pb-40 lg:px-8">
+          <div className="page-container max-w-6xl mx-auto">
+            <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+              <div className="space-y-6">
+                <Badge variant="gold" className="inline-flex">
+                  Built for Ghanaian shops
+                </Badge>
+                <h1 className="display-title text-[clamp(2.75rem,5vw,4.25rem)] leading-[1.05] text-ink mb-4">
+                  Your trade,<br />
+                  <span className="text-primary">under control.</span>
+                </h1>
+                <p className="text-[16px] leading-relaxed text-muted-foreground max-w-lg">
+                  Point of sale, inventory and reporting in one calm system. Built for provision
+                  stores, supermarkets and shops across Ghana.
+                </p>
+                <Button size="lg" variant="gold" className="w-full sm:w-auto" render={<Link href="/login" />} nativeButton={false}>
+                  Sign in
+                  <ArrowRight className="size-4" />
+                </Button>
+                <p className="text-[12px] text-muted-foreground mt-2">
+                  Access is by invitation — organisations are added by your Madetom administrator.
+                </p>
+              </div>
+
+              <div className="relative h-[500px] lg:h-[600px]">
+                <div className="absolute -inset-1 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 blur-xl" />
+                <div className="relative rounded-2xl border border-border/60 bg-card overflow-hidden shadow-[var(--shadow-float)]">
+                  <img
+                    src="https://images.unsplash.com/photo-1542838132-92c53300491e?q=80&w=1000&auto=format&fit=crop"
+                    alt="Ghanaian market seller arranging goods at her shop"
+                    className="w-full h-full object-cover"
+                    loading="lazy"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#14231c]/60 to-transparent" />
+                  <div className="absolute bottom-0 left-0 p-6 sm:p-8 w-full">
+                    <h3 className="font-heading text-[clamp(1.25rem,2vw,1.5rem)] font-semibold text-white tracking-tight">
+                      Adabraka Provisions
+                    </h3>
+                    <p className="mt-1 text-sm text-[#d9e1d7]">
+                      Accra, Ghana &bull; Open since 2018
+                    </p>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </section>
