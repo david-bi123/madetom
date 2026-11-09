@@ -44,6 +44,7 @@ const CONTACT_EMAIL = process.env.NEXT_PUBLIC_CONTACT_EMAIL ?? "hello@samtechlab
 const ACCESS_MAILTO = `mailto:${CONTACT_EMAIL}?subject=Madetom access request&body=Hello SamTech Labs,%0A%0AI would like to set up Madetom for my business.%0A%0ABusiness name:%0ALocation:%0AWhat we sell:%0A%0AThank you.`;
 
 /** The landing page reads live plans and platform status from the database. */
+export const dynamic = "force-dynamic";
 export const instant = false;
 
 const capabilities = [
