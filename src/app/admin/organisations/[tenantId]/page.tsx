@@ -8,15 +8,12 @@ import {
   products,
   sales,
   smsWallets,
-  subscriptionPlans,
-  subscriptions,
   tenantMemberships,
   tenants,
   users,
 } from "@/lib/db/schema";
 import { requireSuperAdmin } from "@/lib/auth/guards";
 import { formatDate } from "@/lib/dates";
-import { formatMoney } from "@/lib/format";
 import { PageHeader, StatCard, SectionHeading } from "@/components/ui/page-header";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { Button } from "@/components/ui/button";
@@ -34,7 +31,7 @@ export default async function AdminOrganisationDetailPage({
   const [tenant] = await db.select().from(tenants).where(eq(tenants.id, tenantId)).limit(1);
   if (!tenant) notFound();
 
-  const [branchRows, memberRows, planRow, walletRow, productCount, saleCount, pendingInvites] =
+  const [branchRows, memberRows, walletRow, productCount, saleCount, pendingInvites] =
     await Promise.all([
       db
         .select()
@@ -57,12 +54,6 @@ export default async function AdminOrganisationDetailPage({
         .where(eq(tenantMemberships.tenantId, tenantId))
         .orderBy(asc(tenantMemberships.joinedAt)),
       db
-        .select({ subscription: subscriptions, plan: subscriptionPlans })
-        .from(subscriptions)
-        .leftJoin(subscriptionPlans, eq(subscriptionPlans.key, subscriptions.planKey))
-        .where(eq(subscriptions.tenantId, tenantId))
-        .limit(1),
-      db
         .select({ credits: smsWallets.credits })
         .from(smsWallets)
         .where(eq(smsWallets.tenantId, tenantId))
@@ -84,8 +75,6 @@ export default async function AdminOrganisationDetailPage({
         .then((rows) => Number(rows[0]?.value ?? 0)),
     ]);
 
-  const subscription = planRow?.[0]?.subscription ?? null;
-  const plan = planRow?.[0]?.plan ?? null;
   const isSuspended = tenant.status === "suspended";
 
   return (
@@ -136,13 +125,6 @@ export default async function AdminOrganisationDetailPage({
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         <StatCard label="Products" value={String(productCount)} icon={Building2} />
         <StatCard label="Sales recorded" value={String(saleCount)} />
-        <StatCard
-          label="Plan"
-          value={plan?.name ?? "None"}
-          icon={Wallet}
-          tone="gold"
-          hint={subscription ? subscription.status : undefined}
-        />
         <StatCard label="SMS credits" value={String(walletRow?.[0]?.credits ?? 0)} />
       </div>
 
@@ -279,46 +261,6 @@ export default async function AdminOrganisationDetailPage({
                 {tenant.location ?? "—"}
               </li>
             </ul>
-          </section>
-
-          <section className="rounded-xl border border-border bg-card p-4 shadow-[var(--shadow-card)]">
-            <SectionHeading title="Subscription" />
-            {subscription && plan ? (
-              <dl className="mt-4 space-y-3 text-[12.5px]">
-                <div className="flex items-start justify-between gap-3">
-                  <dt className="text-muted-foreground">Plan</dt>
-                  <dd className="text-right font-medium text-foreground">{plan.name}</dd>
-                </div>
-                <div className="flex items-start justify-between gap-3">
-                  <dt className="text-muted-foreground">Status</dt>
-                  <dd>
-                    <StatusBadge status={subscription.status} />
-                  </dd>
-                </div>
-                <div className="flex items-start justify-between gap-3">
-                  <dt className="text-muted-foreground">Billing</dt>
-                  <dd className="text-right capitalize text-foreground">{subscription.billingCycle}</dd>
-                </div>
-                <div className="flex items-start justify-between gap-3">
-                  <dt className="text-muted-foreground">Monthly price</dt>
-                  <dd className="text-right font-mono font-medium text-foreground">
-                    {formatMoney(plan.priceMonthly)}
-                  </dd>
-                </div>
-                <div className="flex items-start justify-between gap-3">
-                  <dt className="text-muted-foreground">Period ends</dt>
-                  <dd className="text-right text-muted-foreground">
-                    {subscription.currentPeriodEnd
-                      ? formatDate(subscription.currentPeriodEnd, "short")
-                      : "—"}
-                  </dd>
-                </div>
-              </dl>
-            ) : (
-              <p className="mt-3 text-[12px] text-muted-foreground">
-                No subscription is attached to this organisation yet.
-              </p>
-            )}
           </section>
         </div>
       </div>

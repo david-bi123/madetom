@@ -29,7 +29,6 @@ const organisationSchema = z.object({
   ownerPhone: phoneSchema,
   ownerEmail: emailSchema,
   branchName: z.string().trim().min(2, "Name the first branch.").max(120),
-  planKey: z.string().trim().min(1, "Choose a plan.").max(40),
 });
 
 async function baseUrl(): Promise<string> {
@@ -61,7 +60,6 @@ export async function createOrganisation(state: ActionState, formData: FormData)
     ownerPhone: formString(formData, "ownerPhone"),
     ownerEmail: formString(formData, "ownerEmail").toLowerCase(),
     branchName: formString(formData, "branchName"),
-    planKey: formString(formData, "planKey"),
   });
   if (!parsed.success) return zodState(parsed.error);
   const values = parsed.data;

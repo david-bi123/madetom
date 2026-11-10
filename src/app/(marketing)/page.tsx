@@ -32,25 +32,6 @@ const features = [
   },
 ];
 
-const plans = [
-  {
-    name: "Starter",
-    price: "0",
-    period: "/ month",
-    description: "For a single shop getting started.",
-    features: ["One branch", "Up to 5 staff", "SMS included", "Email support"],
-    featured: false,
-  },
-  {
-    name: "Business",
-    price: "150",
-    period: "/ month",
-    description: "For growing shops with multiple branches.",
-    features: ["Up to 5 branches", "Up to 20 staff", "SMS included", "Priority support"],
-    featured: true,
-  },
-];
-
 export default async function LandingPage() {
   const copyrightYear = await getCopyrightYear();
 
@@ -159,53 +140,6 @@ export default async function LandingPage() {
             </ol>
           </div>
         </section>
-
-        {/* Pricing */}
-        <section className="border-t border-border/60 bg-background py-20 sm:py-28">
-          <div className="page-container">
-            <div className="text-center mb-16">
-              <h2 className="display-title text-[clamp(2rem,4vw,2.75rem)] text-ink mb-4">Simple, honest pricing</h2>
-              <p className="text-muted-foreground">No per-transaction fees. No hidden costs.</p>
-            </div>
-            <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
-              {plans.map((plan) => (
-                <Card key={plan.name} className={`p-8 relative ${plan.featured ? "border-primary bg-primary text-primary-foreground shadow-raised" : ""}`}>
-                  {plan.featured && (
-                    <Badge variant="gold" className="absolute -top-3 left-1/2 -translate-x-1/2 text-xs font-semibold uppercase tracking-wider text-[#241a05] bg-gold">
-                      Most popular
-                    </Badge>
-                  )}
-                  <CardHeader>
-                    <CardTitle className={plan.featured ? "text-white" : "text-ink"}>{plan.name}</CardTitle>
-                    <CardDescription>{plan.description}</CardDescription>
-                  </CardHeader>
-                  <CardContent className="mt-6">
-                    <div className="flex items-baseline gap-1 mb-6">
-                      <span className="font-heading text-[40px] font-bold">{plan.price}</span>
-                      <span className="text-sm font-medium">{plan.period}</span>
-                    </div>
-                    <ul className="space-y-3 mb-8">
-                      {plan.features.map((f) => (
-                        <li key={f} className="flex items-start gap-2 text-sm">
-                          <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-muted/50 text-sm font-semibold">
-                            ✓
-                          </span>
-                          <span>{f}</span>
-                        </li>
-                      ))}
-                    </ul>
-                    <Button size="lg" className="w-full" render={<a href={ACCESS_MAILTO} />} nativeButton={false}>
-                      Request this plan
-                    </Button>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-            <p className="mt-12 text-center text-xs text-muted-foreground">
-              Plan changes and billing are managed by the Madetom team. Prices in Ghana cedis (GH₵).
-            </p>
-          </div>
-        </section>
       </main>
 
       <footer className="border-t border-border/60 bg-background pt-16 pb-10">
@@ -224,7 +158,6 @@ export default async function LandingPage() {
                 <li><a href="#product" className="hover:text-foreground transition-colors">Point of sale</a></li>
                 <li><a href="#operations" className="hover:text-foreground transition-colors">Inventory</a></li>
                 <li><a href="#roles" className="hover:text-foreground transition-colors">Roles & access</a></li>
-                <li><a href="#pricing" className="hover:text-foreground transition-colors">Plans</a></li>
               </ul>
             </div>
             <div>

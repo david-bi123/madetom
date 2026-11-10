@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { asc, eq } from "drizzle-orm";
 import { db } from "@/lib/db";
-import { subscriptionPlans, subscriptions, tenantMemberships, tenants } from "@/lib/db/schema";
+import { tenantMemberships, tenants } from "@/lib/db/schema";
 import { requireSuperAdmin } from "@/lib/auth/guards";
 import { formatDate } from "@/lib/dates";
 import { PageHeader, EmptyState } from "@/components/ui/page-header";
@@ -14,7 +14,7 @@ import { Building2 } from "lucide-react";
 export default async function AdminOrganisationsPage() {
   await requireSuperAdmin();
 
-  const [orgRows, memberRows, plans] = await Promise.all([
+  const [orgRows, memberRows] = await Promise.all([
     db
       .select({
         id: tenants.id,
@@ -25,26 +25,13 @@ export default async function AdminOrganisationsPage() {
         status: tenants.status,
         createdAt: tenants.createdAt,
         onboardingCompletedAt: tenants.onboardingCompletedAt,
-        planName: subscriptionPlans.name,
-        subscriptionStatus: subscriptions.status,
       })
       .from(tenants)
-      .leftJoin(subscriptions, eq(subscriptions.tenantId, tenants.id))
-      .leftJoin(subscriptionPlans, eq(subscriptionPlans.key, subscriptions.planKey))
       .orderBy(asc(tenants.name)),
     db
       .select({ tenantId: tenantMemberships.tenantId })
       .from(tenantMemberships)
       .where(eq(tenantMemberships.status, "active")),
-    db
-      .select({
-        key: subscriptionPlans.key,
-        name: subscriptionPlans.name,
-        smsCredits: subscriptionPlans.smsCredits,
-      })
-      .from(subscriptionPlans)
-      .where(eq(subscriptionPlans.isActive, true))
-      .orderBy(asc(subscriptionPlans.sortOrder)),
   ]);
 
   const membersByOrg = new Map<string, number>();
@@ -57,7 +44,7 @@ export default async function AdminOrganisationsPage() {
       <PageHeader
         eyebrow="SamTech Labs"
         title="Organisations"
-        description="Every workspace on Madetom, with its plan, members and setup state."
+        description="Every workspace on Madetom, with its members and setup state."
       />
 
       {orgRows.length === 0 ? (
@@ -75,10 +62,9 @@ export default async function AdminOrganisationsPage() {
               <thead>
                 <tr className="border-b border-border bg-muted/45">
                   <th className="px-4 py-2.5 text-left text-[10.5px] font-semibold tracking-[0.08em] text-muted-foreground uppercase">Organisation</th>
-                  <th className="px-4 py-2.5 text-left text-[10.5px] font-semibold tracking-[0.08em] text-muted-foreground uppercase">Plan</th>
                   <th className="px-4 py-2.5 text-right text-[10.5px] font-semibold tracking-[0.08em] text-muted-foreground uppercase">Members</th>
                   <th className="px-4 py-2.5 text-left text-[10.5px] font-semibold tracking-[0.08em] text-muted-foreground uppercase">Status</th>
-                  <th className="px-4 py-2.5 text-right text-[10.5px] font-semibold tracking-[0.08em] text-muted-foreground uppercase">Created</th>
+                  <th className="px-4 py-2.5 text-right text-[10.5px] text-muted-foreground uppercase">Created</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border/80">
@@ -92,12 +78,6 @@ export default async function AdminOrganisationsPage() {
                         {org.businessType}
                         {org.location ? ` · ${org.location}` : ""}
                       </p>
-                    </td>
-                    <td className="px-4 py-3 text-[12.5px] text-muted-foreground">
-                      {org.planName ?? "—"}
-                      {org.subscriptionStatus ? (
-                        <span className="mt-0.5 block text-[11px] capitalize">{org.subscriptionStatus}</span>
-                      ) : null}
                     </td>
                     <td className="px-4 py-3 text-right font-mono text-[12px] font-medium tabular">
                       {membersByOrg.get(org.id) ?? 0}
@@ -117,13 +97,7 @@ export default async function AdminOrganisationsPage() {
       )}
 
       <div className="mt-6">
-        <CreateOrganisationForm
-          plans={plans.map((plan) => ({
-            key: plan.key,
-            name: plan.name,
-            smsCredits: plan.smsCredits,
-          }))}
-        />
+        <CreateOrganisationForm />
       </div>
     </div>
   );
