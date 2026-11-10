@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import {
   Building2,
+  ClipboardList,
   CreditCard,
   FileClock,
   LayoutDashboard,
@@ -37,6 +38,7 @@ const ADMIN_NAV = [
   { href: "/admin/sms", label: "SMS usage", icon: MessageSquare },
   { href: "/admin/audit", label: "Audit log", icon: FileClock },
   { href: "/admin/settings", label: "Platform settings", icon: Settings },
+  { href: "/admin/platform-report", label: "Platform report", icon: ClipboardList },
 ];
 
 export function AdminShell({ children, user, pendingInvitations, suspendedOrgs }: AdminShellProps) {

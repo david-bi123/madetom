@@ -11,6 +11,7 @@ import {
   platformSettings,
   smsWallets,
   tenants,
+  users,
 } from "@/lib/db/schema";
 import { requireSuperAdmin } from "@/lib/auth/guards";
 import { writeAudit } from "@/lib/audit";
@@ -19,6 +20,7 @@ import { sendSms, adjustSmsCredits } from "@/lib/services/sms";
 import { normalizePhone } from "@/lib/format";
 import { zodState, formString, type ActionState } from "@/lib/action-state";
 import { emailSchema, phoneSchema } from "@/lib/validation/auth";
+import { runPlatformDailyReport } from "@/lib/services/notifications";
 
 const organisationSchema = z.object({
   businessName: z.string().trim().min(2, "Enter the business name.").max(160),
@@ -295,4 +297,27 @@ export async function updatePlatformSetting(state: ActionState, formData: FormDa
 
   revalidatePath("/admin/settings");
   return { success: "Setting saved." };
+}
+
+export async function sendPlatformReport(): Promise<{ ok: boolean; error?: string; report?: any }> {
+  const [superAdmin] = await db
+    .select({ id: users.id, phone: users.phone, name: users.name })
+    .from(users)
+    .where(eq(users.isSuperAdmin, true))
+    .limit(1);
+
+  if (!superAdmin) {
+    return { ok: false, error: "No super admin account found." };
+  }
+
+  if (!superAdmin.phone) {
+    return { ok: false, error: "The super admin account has no phone number on file." };
+  }
+
+  try {
+    const result = await runPlatformDailyReport();
+    return { ok: true, report: result };
+  } catch (error) {
+    return { ok: false, error: error instanceof Error ? error.message : "Report failed to send." };
+  }
 }
