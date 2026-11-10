@@ -303,24 +303,162 @@ export function AppShell(props: AppShellProps) {
 
   return (
     <div className="min-h-svh bg-background">
-      {/* Desktop sidebar: always visible, in document flow */}
-      <aside className="hidden shrink-0 flex-col bg-[#0b1f19] lg:flex">
-        <div className="no-print h-full">
-          <SidebarContent
-            user={user}
-            tenant={tenant}
-            roleKey={roleKey}
-            roleName={roleName}
-            permissions={permissions}
-            planName={planName}
-            subscriptionStatus={subscriptionStatus}
-            unreadCount={unreadCount}
-            smsCredits={smsCredits}
-            activeBranchName={activeBranch?.name ?? "No branch"}
-          />
-        </div>
-      </aside>
+      {/* Desktop layout: sidebar + main side by side */}
+      <div className="flex h-svh">
+        {/* Desktop sidebar: collapsible, always visible on lg+ */}
+        <aside className="hidden shrink-0 flex-col bg-[#0b1f19] lg:flex lg:w-[264px]">
+          <div className="no-print h-full">
+            <SidebarContent
+              user={user}
+              tenant={tenant}
+              roleKey={roleKey}
+              roleName={roleName}
+              permissions={permissions}
+              planName={planName}
+              subscriptionStatus={subscriptionStatus}
+              unreadCount={unreadCount}
+              smsCredits={smsCredits}
+              activeBranchName={activeBranch?.name ?? "No branch"}
+            />
+          </div>
+        </aside>
 
+        <div className="flex-1 min-w-0 flex flex-col">
+          <header className="no-print sticky top-0 z-30 flex h-14 items-center justify-between gap-3 border-b border-border/80 bg-[#f6f7f3]/92 px-4 backdrop-blur-md sm:px-6 lg:px-8">
+            <div className="flex min-w-0 items-center gap-2.5">
+              <button
+                type="button"
+                onClick={() => setMobileOpen(true)}
+                aria-label="Open menu"
+                className="flex size-8 items-center justify-center rounded-lg border border-border bg-card text-foreground shadow-[var(--shadow-card)] lg:hidden"
+              >
+                <Menu className="size-4" />
+              </button>
+              <div className="hidden min-w-0 items-center gap-2 text-[12px] text-muted-foreground sm:flex">
+                <span className="flex items-center gap-1.5">
+                  <Store className="size-3.5" aria-hidden />
+                  {tenant.name}
+                </span>
+                <span className="text-border">/</span>
+                <span className="font-medium text-foreground">{currentSection}</span>
+              </div>
+              <span className="truncate text-[13px] font-semibold sm:hidden">{tenant.name}</span>
+            </div>
+
+            <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
+              {branches.length > 1 && canViewAllBranches ? (
+                <DropdownMenu>
+                  <DropdownMenuTrigger
+                    className={cn(
+                      "flex h-8 items-center gap-1.5 rounded-lg border border-border bg-card px-2.5 text-[12px] font-medium text-foreground shadow-[var(--shadow-card)] transition-colors hover:bg-muted/50",
+                      branchPending && "opacity-60",
+                    )}
+                    aria-label="Switch branch"
+                  >
+                    <MapPin className="size-3.5 text-primary" aria-hidden />
+                    <span className="hidden max-w-[130px] truncate sm:inline">{activeBranch?.name}</span>
+                    <ChevronDown className="size-3.5 text-muted-foreground" aria-hidden />
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-56">
+                    <DropdownMenuLabel>Active branch</DropdownMenuLabel>
+                    {branches.map((branch) => (
+                      <DropdownMenuItem
+                        key={branch.id}
+                        onClick={() => handleBranchSwitch(branch.id)}
+                        className="cursor-pointer py-2"
+                      >
+                        <span className="flex size-6 items-center justify-center rounded-md bg-muted text-[9px] font-semibold text-muted-foreground">
+                          {branch.code}
+                        </span>
+                        <span className="min-w-0 flex-1 truncate text-[12.5px]">{branch.name}</span>
+                        {branch.id === activeBranchId ? (
+                          <Check className="size-3.5 text-primary" aria-hidden />
+                        ) : null}
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              ) : (
+                <span className="hidden h-8 items-center gap-1.5 rounded-lg border border-border bg-card px-2.5 text-[12px] font-medium text-muted-foreground sm:flex">
+                  <MapPin className="size-3.5 text-primary" aria-hidden />
+                  {activeBranch?.name ?? "No branch"}
+                </span>
+              )}
+
+              <Link
+                href="/app/notifications"
+                aria-label={
+                  unreadCount > 0 ? `Notifications, ${unreadCount} unread` : "Notifications"
+                }
+                className="relative flex size-8 items-center justify-center rounded-lg border border-border bg-card text-muted-foreground shadow-[var(--shadow-card)] transition-colors hover:text-foreground"
+              >
+                <Bell className="size-4" aria-hidden />
+                {unreadCount > 0 ? (
+                  <span className="absolute -top-1 -right-1 flex min-w-4 items-center justify-center rounded-full border border-[#f6f7f3] bg-[#c8962d] px-1 text-[9px] font-bold text-[#1f1705] tabular">
+                    {unreadCount > 9 ? "9+" : unreadCount}
+                  </span>
+                ) : null}
+              </Link>
+
+              <DropdownMenu>
+                <DropdownMenuTrigger
+                  aria-label="Account menu"
+                  className="flex items-center gap-2 rounded-lg p-1 pr-1.5 transition-colors hover:bg-muted/60"
+                >
+                  <Avatar className="size-7 border border-border">
+                    <AvatarFallback className="bg-primary/10 text-[10px] font-semibold text-primary">
+                      {initials(user.name)}
+                    </AvatarFallback>
+                  </Avatar>
+                  <ChevronDown className="hidden size-3.5 text-muted-foreground sm:block" aria-hidden />
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-60">
+                  <div className="px-2 py-2">
+                    <p className="truncate text-[13px] font-semibold">{user.name}</p>
+                    <p className="mt-0.5 truncate text-[11px] text-muted-foreground">{user.email}</p>
+                    <p className="mt-1 text-[10.5px] font-medium text-primary">{roleName}</p>
+                  </div>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => router.push("/app/settings")} className="cursor-pointer py-2">
+                    <Settings className="size-4" aria-hidden />
+                    Business settings
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => router.push("/app/notifications")} className="cursor-pointer py-2">
+                    <Bell className="size-4" aria-hidden />
+                    Notifications
+                    {unreadCount > 0 ? (
+                      <span className="ml-auto rounded-full bg-gold-soft px-1.5 text-[10px] font-semibold text-[#7c5a13] tabular">
+                        {unreadCount}
+                      </span>
+                    ) : null}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => router.push("/app/subscription")} className="cursor-pointer py-2">
+                    <CreditCard className="size-4" aria-hidden />
+                    Plan & usage
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    variant="destructive"
+                    onClick={handleLogout}
+                    className="cursor-pointer py-2"
+                  >
+                    <LogOut className="size-4" aria-hidden />
+                    Sign out
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          </header>
+
+          {maintenance ? <MaintenanceBanner message={maintenance.message} /> : null}
+
+          <main className="mx-auto w-full max-w-[1480px] px-4 py-6 sm:px-6 lg:px-8 lg:py-7 print:p-0 flex-1">
+            {children}
+          </main>
+        </div>
+      </div>
+
+      {/* Mobile sidebar: slide-out panel */}
       <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
         <SheetContent side="left" showCloseButton={false} className="w-[280px] border-0 bg-sidebar p-0 sm:max-w-[280px]">
           <SidebarContent
@@ -346,140 +484,6 @@ export function AppShell(props: AppShellProps) {
           </button>
         </SheetContent>
       </Sheet>
-
-      <div>
-        <header className="no-print sticky top-0 z-30 flex h-14 items-center justify-between gap-3 border-b border-border/80 bg-[#f6f7f3]/92 px-4 backdrop-blur-md sm:px-6 lg:px-8">
-          <div className="flex min-w-0 items-center gap-2.5">
-            <button
-              type="button"
-              onClick={() => setMobileOpen(true)}
-              aria-label="Open menu"
-              className="flex size-8 items-center justify-center rounded-lg border border-border bg-card text-foreground shadow-[var(--shadow-card)] lg:hidden"
-            >
-              <Menu className="size-4" />
-            </button>
-            <div className="hidden min-w-0 items-center gap-2 text-[12px] text-muted-foreground sm:flex">
-              <span className="flex items-center gap-1.5">
-                <Store className="size-3.5" aria-hidden />
-                {tenant.name}
-              </span>
-              <span className="text-border">/</span>
-              <span className="font-medium text-foreground">{currentSection}</span>
-            </div>
-            <span className="truncate text-[13px] font-semibold sm:hidden">{tenant.name}</span>
-          </div>
-
-          <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
-            {branches.length > 1 && canViewAllBranches ? (
-              <DropdownMenu>
-                <DropdownMenuTrigger
-                  className={cn(
-                    "flex h-8 items-center gap-1.5 rounded-lg border border-border bg-card px-2.5 text-[12px] font-medium text-foreground shadow-[var(--shadow-card)] transition-colors hover:bg-muted/50",
-                    branchPending && "opacity-60",
-                  )}
-                  aria-label="Switch branch"
-                >
-                  <MapPin className="size-3.5 text-primary" aria-hidden />
-                  <span className="hidden max-w-[130px] truncate sm:inline">{activeBranch?.name}</span>
-                  <ChevronDown className="size-3.5 text-muted-foreground" aria-hidden />
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56">
-                  <DropdownMenuLabel>Active branch</DropdownMenuLabel>
-                  {branches.map((branch) => (
-                    <DropdownMenuItem
-                      key={branch.id}
-                      onClick={() => handleBranchSwitch(branch.id)}
-                      className="cursor-pointer py-2"
-                    >
-                      <span className="flex size-6 items-center justify-center rounded-md bg-muted text-[9px] font-semibold text-muted-foreground">
-                        {branch.code}
-                      </span>
-                      <span className="min-w-0 flex-1 truncate text-[12.5px]">{branch.name}</span>
-                      {branch.id === activeBranchId ? (
-                        <Check className="size-3.5 text-primary" aria-hidden />
-                      ) : null}
-                    </DropdownMenuItem>
-                  ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
-            ) : (
-              <span className="hidden h-8 items-center gap-1.5 rounded-lg border border-border bg-card px-2.5 text-[12px] font-medium text-muted-foreground sm:flex">
-                <MapPin className="size-3.5 text-primary" aria-hidden />
-                {activeBranch?.name ?? "No branch"}
-              </span>
-            )}
-
-            <Link
-              href="/app/notifications"
-              aria-label={
-                unreadCount > 0 ? `Notifications, ${unreadCount} unread` : "Notifications"
-              }
-              className="relative flex size-8 items-center justify-center rounded-lg border border-border bg-card text-muted-foreground shadow-[var(--shadow-card)] transition-colors hover:text-foreground"
-            >
-              <Bell className="size-4" aria-hidden />
-              {unreadCount > 0 ? (
-                <span className="absolute -top-1 -right-1 flex min-w-4 items-center justify-center rounded-full border border-[#f6f7f3] bg-[#c8962d] px-1 text-[9px] font-bold text-[#1f1705] tabular">
-                  {unreadCount > 9 ? "9+" : unreadCount}
-                </span>
-              ) : null}
-            </Link>
-
-            <DropdownMenu>
-              <DropdownMenuTrigger
-                aria-label="Account menu"
-                className="flex items-center gap-2 rounded-lg p-1 pr-1.5 transition-colors hover:bg-muted/60"
-              >
-                <Avatar className="size-7 border border-border">
-                  <AvatarFallback className="bg-primary/10 text-[10px] font-semibold text-primary">
-                    {initials(user.name)}
-                  </AvatarFallback>
-                </Avatar>
-                <ChevronDown className="hidden size-3.5 text-muted-foreground sm:block" aria-hidden />
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-60">
-                <div className="px-2 py-2">
-                  <p className="truncate text-[13px] font-semibold">{user.name}</p>
-                  <p className="mt-0.5 truncate text-[11px] text-muted-foreground">{user.email}</p>
-                  <p className="mt-1 text-[10.5px] font-medium text-primary">{roleName}</p>
-                </div>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => router.push("/app/settings")} className="cursor-pointer py-2">
-                  <Settings className="size-4" aria-hidden />
-                  Business settings
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => router.push("/app/notifications")} className="cursor-pointer py-2">
-                  <Bell className="size-4" aria-hidden />
-                  Notifications
-                  {unreadCount > 0 ? (
-                    <span className="ml-auto rounded-full bg-gold-soft px-1.5 text-[10px] font-semibold text-[#7c5a13] tabular">
-                      {unreadCount}
-                    </span>
-                  ) : null}
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => router.push("/app/subscription")} className="cursor-pointer py-2">
-                  <CreditCard className="size-4" aria-hidden />
-                  Plan & usage
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  variant="destructive"
-                  onClick={handleLogout}
-                  className="cursor-pointer py-2"
-                >
-                  <LogOut className="size-4" aria-hidden />
-                  Sign out
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-        </header>
-
-        {maintenance ? <MaintenanceBanner message={maintenance.message} /> : null}
-
-        <main className="mx-auto w-full max-w-[1480px] px-4 py-6 sm:px-6 lg:px-8 lg:py-7 print:p-0">
-          {children}
-        </main>
-      </div>
 
       {branchPending ? (
         <div className="fixed inset-x-0 top-0 z-50 h-0.5 overflow-hidden bg-primary/20">
