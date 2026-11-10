@@ -8,6 +8,7 @@ import {
   products,
   productVariants,
   sales,
+  smsLogs,
   tenantMemberships,
   tenants,
   users,
@@ -362,3 +363,76 @@ export async function runDailySummaries(): Promise<{ tenants: number; notified: 
 
   return { tenants: activeTenants.length, notified };
 }
+
+/**
+ * Daily platform health report sent to the super admin.
+ * Aggregates tenant counts, SMS usage, and recent activity across the platform.
+ */
+export async function runPlatformDailyReport(): Promise<{
+  tenants: number;
+  activeTenants: number;
+  smsSentToday: number;
+  smsFailedToday: number;
+  superAdminNotified: boolean;
+}> {
+  const yesterdayStart = startOfDay(subDays(new Date(), 1));
+  const todayStart = startOfDay(new Date());
+
+  const [tenantCounts] = await db
+    .select({
+      total: sql<number>`COUNT(*)`,
+      active: sql<number>`SUM(CASE WHEN status = 'active' THEN 1 ELSE 0 END)`,
+    })
+    .from(tenants);
+
+  const [smsCounts] = await db
+    .select({
+      sent: sql<number>`SUM(CASE WHEN status = 'sent' THEN 1 ELSE 0 END)`,
+      failed: sql<number>`SUM(CASE WHEN status = 'failed' THEN 1 ELSE 0 END)`,
+    })
+    .from(smsLogs)
+    .where(sql`${smsLogs.createdAt} >= ${yesterdayStart} AND ${smsLogs.createdAt} < ${todayStart}`);
+
+  const totalTenants = Number(tenantCounts?.total ?? 0);
+  const activeTenants = Number(tenantCounts?.active ?? 0);
+  const smsSent = Number(smsCounts?.sent ?? 0);
+  const smsFailed = Number(smsCounts?.failed ?? 0);
+
+  const body =
+    `Madetom Platform Daily Report · ${todayStart.toISOString().slice(0, 10)}:\n` +
+    `Workspaces: ${activeTenants} active / ${totalTenants} total\n` +
+    `SMS sent: ${smsSent}, failed: ${smsFailed}\n` +
+    `Platform is operating normally.`;
+
+  let superAdminNotified = false;
+  try {
+    const [superAdmin] = await db
+      .select({ id: users.id, phone: users.phone, name: users.name })
+      .from(users)
+      .where(eq(users.isSuperAdmin, true))
+      .limit(1);
+
+    if (superAdmin?.phone) {
+      await sendSms({
+        tenantId: null,
+        phone: superAdmin.phone,
+        message: body.slice(0, 320),
+        purpose: "platform_report",
+        createdBy: superAdmin.id,
+        deductCredit: false,
+      });
+      superAdminNotified = true;
+    }
+  } catch (error) {
+    console.error("platform_daily_report_failed", error);
+  }
+
+  return {
+    tenants: totalTenants,
+    activeTenants,
+    smsSentToday: smsSent,
+    smsFailedToday: smsFailed,
+    superAdminNotified,
+  };
+}
+

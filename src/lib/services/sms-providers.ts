@@ -55,7 +55,7 @@ async function sendWithSmsGate({ to, message }: SmsMessage): Promise<SmsSendResu
         Authorization: config.authorization,
       },
       body: JSON.stringify({
-        textMessage: { text: message },
+        textMessage: { text: `Madetom · ${message}` },
         phoneNumbers: [normalizePhone(to)],
         ...(Number.isInteger(simNumber) && simNumber > 0 ? { simNumber } : {}),
         ttl: Number.isFinite(ttl) && ttl > 0 ? Math.trunc(ttl) : 3600,

@@ -12,6 +12,7 @@ import { normalizePhone } from "@/lib/format";
 import { formString, type ActionState, zodState } from "@/lib/action-state";
 import { passwordSchema } from "@/lib/validation/auth";
 import { z } from "zod";
+import { sendSms } from "@/lib/services/sms";
 
 const phoneSchema = z
   .string()
@@ -104,6 +105,17 @@ export async function setupSuperAdmin(formData: FormData): Promise<ActionState> 
     entityType: "user",
     entityId: userId,
     summary: "First super admin account created via setup link.",
+  });
+
+  // Welcome SMS to the new super admin (platform-level, no credit deduction).
+  await sendSms({
+    tenantId: null,
+    phone: normalizePhone(data.phone),
+    message:
+      "Welcome to Madetom. Your super admin account is ready. Sign in at your Madetom dashboard to add organisations and manage the platform.",
+    purpose: "welcome",
+    createdBy: userId,
+    deductCredit: false,
   });
 
   redirect("/admin");

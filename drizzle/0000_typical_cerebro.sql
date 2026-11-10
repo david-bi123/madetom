@@ -102,9 +102,9 @@ CREATE TABLE `notification_preferences` (
 	`out_of_stock` boolean NOT NULL DEFAULT true,
 	`daily_summary` boolean NOT NULL DEFAULT false,
 	`stock_adjustments` boolean NOT NULL DEFAULT true,
-	`sms_low_stock` boolean NOT NULL DEFAULT false,
-	`sms_out_of_stock` boolean NOT NULL DEFAULT false,
-	`sms_daily_summary` boolean NOT NULL DEFAULT false,
+	`sms_low_stock` boolean NOT NULL DEFAULT true,
+	`sms_out_of_stock` boolean NOT NULL DEFAULT true,
+	`sms_daily_summary` boolean NOT NULL DEFAULT true,
 	`updated_at` timestamp NOT NULL DEFAULT (now()),
 	CONSTRAINT `notification_preferences_id` PRIMARY KEY(`id`),
 	CONSTRAINT `notification_prefs_user_uq` UNIQUE(`tenant_id`,`user_id`)
