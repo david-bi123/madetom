@@ -303,7 +303,8 @@ export function AppShell(props: AppShellProps) {
 
   return (
     <div className="min-h-svh bg-background">
-      <div className="fixed inset-y-0 left-0 z-40 hidden w-[264px] lg:block">
+      {/* Desktop sidebar: always visible, in document flow */}
+      <aside className="hidden shrink-0 flex-col bg-[#0b1f19] lg:flex">
         <div className="no-print h-full">
           <SidebarContent
             user={user}
@@ -318,7 +319,7 @@ export function AppShell(props: AppShellProps) {
             activeBranchName={activeBranch?.name ?? "No branch"}
           />
         </div>
-      </div>
+      </aside>
 
       <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
         <SheetContent side="left" showCloseButton={false} className="w-[280px] border-0 bg-sidebar p-0 sm:max-w-[280px]">
@@ -346,7 +347,7 @@ export function AppShell(props: AppShellProps) {
         </SheetContent>
       </Sheet>
 
-      <div className="lg:pl-[264px]">
+      <div>
         <header className="no-print sticky top-0 z-30 flex h-14 items-center justify-between gap-3 border-b border-border/80 bg-[#f6f7f3]/92 px-4 backdrop-blur-md sm:px-6 lg:px-8">
           <div className="flex min-w-0 items-center gap-2.5">
             <button
