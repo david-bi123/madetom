@@ -331,7 +331,9 @@ export async function runDailySummaries(): Promise<{ tenants: number; notified: 
 
       const revenue = Number(totals?.revenue ?? 0);
       const count = Number(totals?.count ?? 0);
-      const body = `${formatMoney(revenue, tenant.currency)} from ${formatNumber(count)} ${count === 1 ? "sale" : "sales"} yesterday (${dateLabel}).`;
+      const appUrl = process.env.APP_URL ?? "https://madetom.vercel.app";
+      const reportLink = `${appUrl}/app/reports`;
+      const body = `${formatMoney(revenue, tenant.currency)} from ${formatNumber(count)} ${count === 1 ? "sale" : "sales"} yesterday (${dateLabel}). Open the full report: ${reportLink}`;
 
       await createNotification({
         tenantId: tenant.id,
@@ -398,11 +400,13 @@ export async function runPlatformDailyReport(): Promise<{
   const smsSent = Number(smsCounts?.sent ?? 0);
   const smsFailed = Number(smsCounts?.failed ?? 0);
 
+  const appUrl = process.env.APP_URL ?? "https://madetom.vercel.app";
+  const reportLink = `${appUrl}/admin/platform-report`;
   const body =
     `Madetom Platform Daily Report · ${todayStart.toISOString().slice(0, 10)}:\n` +
     `Workspaces: ${activeTenants} active / ${totalTenants} total\n` +
     `SMS sent: ${smsSent}, failed: ${smsFailed}\n` +
-    `Platform is operating normally.`;
+    `View full report: ${reportLink}`;
 
   let superAdminNotified = false;
   try {
