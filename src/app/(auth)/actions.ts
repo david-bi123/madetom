@@ -23,6 +23,7 @@ import {
 import { consumeRateLimit, clearRateLimit } from "@/lib/rate-limit";
 import { writeAudit } from "@/lib/audit";
 import { sendSms } from "@/lib/services/sms";
+import { normalizePhone } from "@/lib/format";
 import { zodState, type ActionState, formString } from "@/lib/action-state";
 import {
   forgotPasswordSchema,
@@ -40,37 +41,57 @@ async function requestIp(): Promise<string> {
 
 export async function loginAction(formData: FormData): Promise<ActionState> {
   const parsed = loginSchema.safeParse({
-    email: formString(formData, "email"),
+    login: formString(formData, "login"),
     password: formString(formData, "password"),
   });
   if (!parsed.success) return zodState(parsed.error);
 
-  const email = parsed.data.email.toLowerCase();
+  const login = parsed.data.login.toLowerCase();
+  const password = parsed.data.password;
   const ip = await requestIp();
-  const limit = await consumeRateLimit(`login:${ip}:${email}`, 8, 15 * 60);
+
+  const isPhone = login.includes("+") || /^\d/.test(login.replace(/\s/g, ""));
+  const normalizedPhone = isPhone ? normalizePhone(login) : null;
+
+  const rateLimitKey = isPhone ? `login:${ip}:phone:${normalizedPhone}` : `login:${ip}:email:${login}`;
+  const limit = await consumeRateLimit(rateLimitKey, 8, 15 * 60);
   if (!limit.allowed) {
     return { error: "Too many sign-in attempts. Wait 15 minutes and try again." };
   }
 
-  const [user] = await db.select().from(users).where(eq(users.email, email)).limit(1);
-  const passwordValid = await verifyPassword(parsed.data.password, user?.passwordHash ?? DUMMY_HASH);
+  const [user] = await db
+    .select()
+    .from(users)
+    .where(
+      isPhone && normalizedPhone
+        ? and(eq(users.phone, normalizedPhone), isNull(users.email))
+        : eq(users.email, login),
+    )
+    .limit(1);
 
-  if (!user || !user.passwordHash || !passwordValid) {
-    return { error: "The email or password is incorrect." };
+  // Fallback: try matching by phone if email lookup failed
+  const userToVerify = user ?? (isPhone && normalizedPhone
+    ? await db.select().from(users).where(eq(users.phone, normalizedPhone)).limit(1).then((r) => r[0])
+    : null);
+
+  const passwordValid = await verifyPassword(password, userToVerify?.passwordHash ?? DUMMY_HASH);
+
+  if (!userToVerify || !userToVerify.passwordHash || !passwordValid) {
+    return { error: "The email, phone or password is incorrect." };
   }
-  if (user.status !== "active") {
+  if (userToVerify.status !== "active") {
     return { error: "This account is not active. Contact your Madetom administrator." };
   }
 
-  if (user.isSuperAdmin) {
-    await clearRateLimit(`login:${ip}:${email}`);
-    await createSession(user.id);
+  if (userToVerify.isSuperAdmin) {
+    await clearRateLimit(rateLimitKey);
+    await createSession(userToVerify.id);
     await writeAudit({
-      actorUserId: user.id,
-      actorName: user.name,
+      actorUserId: userToVerify.id,
+      actorName: userToVerify.name,
       action: "auth.login",
       entityType: "user",
-      entityId: user.id,
+      entityId: userToVerify.id,
       summary: "Signed in to the platform console",
     });
     redirect("/admin");
@@ -80,7 +101,7 @@ export async function loginAction(formData: FormData): Promise<ActionState> {
     .select({ membership: tenantMemberships, tenant: tenants })
     .from(tenantMemberships)
     .innerJoin(tenants, eq(tenants.id, tenantMemberships.tenantId))
-    .where(and(eq(tenantMemberships.userId, user.id), eq(tenantMemberships.status, "active")))
+    .where(and(eq(tenantMemberships.userId, userToVerify.id), eq(tenantMemberships.status, "active")))
     .limit(1);
 
   if (!membership) {
@@ -99,16 +120,16 @@ export async function loginAction(formData: FormData): Promise<ActionState> {
     };
   }
 
-  await clearRateLimit(`login:${ip}:${email}`);
-  await createSession(user.id);
-  await db.update(users).set({ lastLoginAt: new Date() }).where(eq(users.id, user.id));
+  await clearRateLimit(rateLimitKey);
+  await createSession(userToVerify.id);
+  await db.update(users).set({ lastLoginAt: new Date() }).where(eq(users.id, userToVerify.id));
   await writeAudit({
     tenantId: membership.tenant.id,
-    actorUserId: user.id,
-    actorName: user.name,
+    actorUserId: userToVerify.id,
+    actorName: userToVerify.name,
     action: "auth.login",
     entityType: "user",
-    entityId: user.id,
+    entityId: userToVerify.id,
     summary: "Signed in to the business workspace",
   });
 

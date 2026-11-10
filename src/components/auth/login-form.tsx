@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowRight, Mail } from "lucide-react";
+import { ArrowRight, Mail, Phone } from "lucide-react";
 import type { z } from "zod";
 import { loginAction } from "@/app/(auth)/actions";
 import { loginSchema } from "@/lib/validation/auth";
@@ -23,19 +23,22 @@ export function LoginForm() {
     handleSubmit,
     setError,
     clearErrors,
+    watch,
     formState: { errors, isSubmitting },
   } = useForm<LoginValues>({
     resolver: zodResolver(loginSchema),
-    defaultValues: { email: "", password: "" },
+    defaultValues: { login: "", password: "" },
     mode: "onBlur",
   });
+
+  const loginValue = watch("login") ?? "";
 
   async function onSubmit(values: LoginValues) {
     setServerError(undefined);
     clearErrors();
 
     const formData = new FormData();
-    formData.set("email", values.email);
+    formData.set("login", values.login);
     formData.set("password", values.password);
 
     const result = await loginAction(formData);
@@ -43,7 +46,7 @@ export function LoginForm() {
 
     if (result.fieldErrors) {
       for (const [key, messages] of Object.entries(result.fieldErrors)) {
-        if (key === "email" || key === "password") {
+        if (key === "login" || key === "password") {
           setError(key, { type: "server", message: messages[0] });
         }
       }
@@ -55,23 +58,30 @@ export function LoginForm() {
     <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-5">
       <FormError message={serverError} />
 
-      <Field label="Email address" htmlFor="email" error={errors.email?.message} required>
+      <Field label="Email or phone" htmlFor="login" error={errors.login?.message} required>
         <div className="relative">
-          <Mail
-            className="pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-muted-foreground"
-            aria-hidden
-          />
+          {/^(\+?\d[\s-]?)+$/.test(loginValue) ? (
+            <Phone
+              className="pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-muted-foreground"
+              aria-hidden
+            />
+          ) : (
+            <Mail
+              className="pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-muted-foreground"
+              aria-hidden
+            />
+          )}
           <Input
-            id="email"
-            type="email"
-            inputMode="email"
-            autoComplete="email"
+            id="login"
+            type="text"
+            inputMode={/^(\+?\d[\s-]?)+$/.test(loginValue) ? "tel" : "email"}
+            autoComplete={/^(\+?\d[\s-]?)+$/.test(loginValue) ? "tel" : "email"}
             autoCapitalize="none"
             spellCheck={false}
-            placeholder="you@business.com"
-            aria-invalid={Boolean(errors.email)}
+            placeholder="you@business.com or 055 062 4203"
+            aria-invalid={Boolean(errors.login)}
             className="h-11 rounded-xl pl-10 text-[15px]"
-            {...register("email")}
+            {...register("login")}
           />
         </div>
       </Field>

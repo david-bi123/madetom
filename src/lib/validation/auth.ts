@@ -23,7 +23,11 @@ export const passwordSchema = z
   .regex(/[0-9]/, "Include at least one number.");
 
 export const loginSchema = z.object({
-  email: emailSchema,
+  login: z
+    .string()
+    .trim()
+    .min(1, "Enter your email or phone number.")
+    .max(160, "Email or phone is too long."),
   password: z.string().min(1, "Enter your password."),
 });
 
