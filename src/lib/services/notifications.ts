@@ -333,7 +333,12 @@ export async function runDailySummaries(): Promise<{ tenants: number; notified: 
       const count = Number(totals?.count ?? 0);
       const appUrl = process.env.APP_URL ?? "https://madetom.vercel.app";
       const reportLink = `${appUrl}/app/reports`;
-      const body = `${formatMoney(revenue, tenant.currency)} from ${formatNumber(count)} ${count === 1 ? "sale" : "sales"} yesterday (${dateLabel}). Open the full report: ${reportLink}`;
+      const body =
+        `Madetom Daily Sales Summary — ${dateLabel}\n` +
+        `Shop: ${tenant.name}\n` +
+        `Revenue: ${formatMoney(revenue, tenant.currency)}\n` +
+        `Transactions: ${formatNumber(count)}\n` +
+        `View full report: ${reportLink}`;
 
       await createNotification({
         tenantId: tenant.id,
@@ -351,7 +356,7 @@ export async function runDailySummaries(): Promise<{ tenants: number; notified: 
         await sendSms({
           tenantId: tenant.id,
           phone: owner.user.phone,
-          message: `Madetom · ${tenant.name}: ${body}`.slice(0, 320),
+          message: body.slice(0, 320),
           purpose: "daily_summary",
           relatedType: "report",
           relatedId: dateLabel,
@@ -403,9 +408,10 @@ export async function runPlatformDailyReport(): Promise<{
   const appUrl = process.env.APP_URL ?? "https://madetom.vercel.app";
   const reportLink = `${appUrl}/admin/platform-report`;
   const body =
-    `Madetom Platform Daily Report · ${todayStart.toISOString().slice(0, 10)}:\n` +
+    `Madetom Platform Daily Report — ${todayStart.toISOString().slice(0, 10)}\n` +
     `Workspaces: ${activeTenants} active / ${totalTenants} total\n` +
-    `SMS sent: ${smsSent}, failed: ${smsFailed}\n` +
+    `SMS sent: ${smsSent}\n` +
+    `SMS failed: ${smsFailed}\n` +
     `View full report: ${reportLink}`;
 
   let superAdminNotified = false;
