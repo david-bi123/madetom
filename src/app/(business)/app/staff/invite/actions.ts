@@ -1,6 +1,5 @@
 "use server";
 
-import { headers } from "next/headers";
 import { and, eq } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { branches, invitations } from "@/lib/db/schema";
@@ -12,16 +11,9 @@ import { normalizePhone } from "@/lib/format";
 import { zodState, formString, type ActionState } from "@/lib/action-state";
 import { staffInviteSchema } from "@/lib/validation/staff";
 import { assertStaffCapacity } from "@/lib/subscription/entitlements";
+import { getAppUrl } from "@/lib/app-url";
 
 const INVITE_TTL_DAYS = 7;
-
-async function baseUrl(): Promise<string> {
-  const requestHeaders = await headers();
-  const host = requestHeaders.get("host") ?? "localhost:3000";
-  const forwardedProto = requestHeaders.get("x-forwarded-proto");
-  const protocol = forwardedProto ?? (host.startsWith("localhost") ? "http" : "https");
-  return process.env.APP_URL ?? `${protocol}://${host}`;
-}
 
 export async function inviteStaff(state: ActionState, formData: FormData): Promise<ActionState> {
   const context = await requireBusiness("staff.manage");
@@ -105,7 +97,7 @@ export async function inviteStaff(state: ActionState, formData: FormData): Promi
     };
   }
 
-  const link = `${await baseUrl()}/setup/${rawToken}`;
+  const link = `${await getAppUrl()}/setup/${rawToken}`;
   const sms = await sendSms({
     tenantId,
     phone: normalizePhone(values.phone),
