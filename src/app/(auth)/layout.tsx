@@ -113,7 +113,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
 
         <footer className="px-5 pb-5 sm:px-8 lg:px-10 lg:pb-8">
           <p className="text-center text-[11.5px] text-muted-foreground">
-            © SamTech Labs. Madetom is invitation-only.
+            © SamTech Labs. Madetom keeps your business records in your workspace.
           </p>
         </footer>
       </main>

@@ -64,6 +64,7 @@ export type AppShellProps = {
   unreadCount: number;
   smsCredits: number;
   maintenance: { message: string } | null;
+  subscriptionNotice?: { message: string; tone: "warning" | "danger" } | null;
 };
 
 type NavItem = {
@@ -271,7 +272,7 @@ function SidebarContent({
 }
 
 export function AppShell(props: AppShellProps) {
-  const { children, user, tenant, roleKey, roleName, permissions, branches, activeBranchId, canViewAllBranches, planName, subscriptionStatus, unreadCount, smsCredits, maintenance } = props;
+  const { children, user, tenant, roleKey, roleName, permissions, branches, activeBranchId, canViewAllBranches, planName, subscriptionStatus, unreadCount, smsCredits, maintenance, subscriptionNotice } = props;
   const pathname = usePathname();
   const router = useRouter();
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -451,6 +452,23 @@ export function AppShell(props: AppShellProps) {
           </header>
 
           {maintenance ? <MaintenanceBanner message={maintenance.message} /> : null}
+
+          {subscriptionNotice ? (
+            <div
+              role="status"
+              className={cn(
+                "no-print flex flex-wrap items-center justify-between gap-2 border-b px-4 py-2.5 text-[12.5px] font-medium sm:px-6 lg:px-8",
+                subscriptionNotice.tone === "danger"
+                  ? "border-destructive/25 bg-danger-soft text-destructive"
+                  : "border-[#e8d7a8] bg-warning-soft text-[#7c4b08]",
+              )}
+            >
+              <span>{subscriptionNotice.message}</span>
+              <Link href="/app/subscription" className="shrink-0 underline underline-offset-2">
+                Review plan
+              </Link>
+            </div>
+          ) : null}
 
           <main className="mx-auto w-full max-w-[1480px] px-4 py-6 sm:px-6 lg:px-8 lg:py-7 print:p-0 flex-1">
             {children}

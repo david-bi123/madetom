@@ -225,23 +225,25 @@ export async function completeSetup(formData: FormData): Promise<ActionState> {
 
         let plan = lookup.plan;
         if (!subscription) {
-          const [trialPlan] = await tx
+          const [starterPlan] = await tx
             .select()
             .from(subscriptionPlans)
-            .where(eq(subscriptionPlans.key, "trial"))
+            .where(eq(subscriptionPlans.key, "starter"))
             .limit(1);
-          plan = trialPlan ?? null;
+          plan = starterPlan ?? null;
 
           await tx.insert(subscriptions).values({
             id: crypto.randomUUID(),
             tenantId: tenant.id,
-            planKey: trialPlan?.key ?? "trial",
-            status: "trial",
+            planKey: starterPlan?.key ?? "starter",
+            status: "active",
             billingCycle: "monthly",
-            trialEndsAt: new Date(now.getTime() + 14 * 86400000),
+            billingAmount: starterPlan?.priceMonthly ?? "500.00",
+            currency: "GHS",
+            trialEndsAt: null,
             currentPeriodStart: now,
-            currentPeriodEnd: new Date(now.getTime() + 14 * 86400000),
-            notes: "Trial started when the owner completed business setup.",
+            currentPeriodEnd: new Date(now.getTime() + 30 * 86400000),
+            notes: "Starter plan assigned automatically when the owner completed business setup.",
           });
         }
 

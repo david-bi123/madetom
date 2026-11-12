@@ -34,6 +34,7 @@ import { PageHeader, StatCard, SectionHeading, EmptyState, InlineHint } from "@/
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { SalesChart, type SalesChartPoint } from "@/components/charts/sales-chart";
+import { hasFeature } from "@/lib/subscription/entitlements";
 
 /** The dashboard reads live tenant data, so it is a blocking route. */
 
@@ -72,6 +73,8 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
   const params = await searchParams;
   const canSeeReports = context.permissions.has("reports.view");
   const canManageProducts = context.permissions.has("products.manage");
+  const profitAccess = await hasFeature(context.tenant.id, "reports.profit");
+  const canSeeProfit = canSeeReports && profitAccess.allowed;
   const now = new Date();
   const todayStart = startOfDay(now);
   const todayEnd = endOfDay(now);
@@ -339,7 +342,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
           icon={ShoppingBag}
           hint={`Average sale ${formatMoney(averageSale)}`}
         />
-        {canSeeReports ? (
+        {canSeeProfit ? (
           <StatCard
             label="Gross profit"
             value={formatMoney(grossProfit)}

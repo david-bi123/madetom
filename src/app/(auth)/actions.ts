@@ -114,6 +114,21 @@ export async function loginAction(formData: FormData): Promise<ActionState> {
       error: "This business account is suspended. Contact Madetom support to restore access.",
     };
   }
+  if (membership.tenant.status === "pending" && !membership.tenant.paymentExempt) {
+    await clearRateLimit(rateLimitKey);
+    await createSession(userToVerify.id);
+    await db.update(users).set({ lastLoginAt: new Date() }).where(eq(users.id, userToVerify.id));
+    await writeAudit({
+      tenantId: membership.tenant.id,
+      actorUserId: userToVerify.id,
+      actorName: userToVerify.name,
+      action: "auth.login",
+      entityType: "user",
+      entityId: userToVerify.id,
+      summary: "Signed in to complete the workspace payment",
+    });
+    redirect("/pending-payment");
+  }
   if (!membership.tenant.onboardingCompletedAt) {
     return {
       error: "Business setup is not complete. Open the secure invitation link sent to the owner.",

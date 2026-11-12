@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { eq } from "drizzle-orm";
 import { db } from "@/lib/db";
@@ -25,9 +26,9 @@ export default async function SetupSuperAdminPage() {
     <div className="min-h-screen bg-background">
       <header className="border-b border-border/60 bg-background/80 backdrop-blur-md sticky top-0 z-20">
         <div className="page-container flex h-[64px] items-center justify-between">
-          <a href="/" aria-label="Madetom home">
+          <Link href="/" aria-label="Madetom home">
             <span className="font-heading text-xl font-semibold text-ink tracking-tight">Madetom</span>
-          </a>
+          </Link>
         </div>
       </header>
 

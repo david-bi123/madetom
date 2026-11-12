@@ -8,8 +8,11 @@ import { formatMoney, percent } from "@/lib/format";
 import { PageHeader, StatCard, SectionHeading } from "@/components/ui/page-header";
 import { SalesChart, type SalesChartPoint } from "@/components/charts/sales-chart";
 import { Button } from "@/components/ui/button";
-import { Download, FileText } from "lucide-react";
+import { Download, FileText, Lock } from "lucide-react";
 import { CircleDollarSign, ClipboardCheck, ReceiptText } from "lucide-react";
+import Link from "next/link";
+import { hasFeature } from "@/lib/subscription/entitlements";
+import { cheapestPlanForFeature, getPlanConfig } from "@/lib/subscription/plans";
 
 /** This screen reads request-time data, so it is a blocking route. */
 
@@ -18,6 +21,9 @@ export default async function ReportsPage() {
   const tenantId = context.tenant.id;
   const branchId = context.activeBranch.id;
   const now = new Date();
+
+  const profitAccess = await hasFeature(tenantId, "reports.profit");
+  const profitPlan = cheapestPlanForFeature("reports.profit");
 
   const todayStart = startOfDay(now);
   const todayEnd = endOfDay(now);
@@ -122,7 +128,28 @@ export default async function ReportsPage() {
 
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         <StatCard label="Net revenue today" value={formatMoney(netRevenueToday)} icon={CircleDollarSign} tone="gold" />
-        <StatCard label="Gross profit today" value={formatMoney(Math.max(grossProfitToday, 0))} icon={ClipboardCheck} tone={grossProfitToday < 0 ? "critical" : "default"} hint={`${percent(marginToday)} margin`} />
+        {profitAccess.allowed ? (
+          <StatCard label="Gross profit today" value={formatMoney(Math.max(grossProfitToday, 0))} icon={ClipboardCheck} tone={grossProfitToday < 0 ? "critical" : "default"} hint={`${percent(marginToday)} margin`} />
+        ) : (
+          <div className="rounded-xl border border-border bg-card p-4 shadow-[var(--shadow-card)]">
+            <div className="flex items-start justify-between gap-3">
+              <p className="text-[12px] font-medium text-muted-foreground">Gross profit today</p>
+              <span className="flex size-7 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground">
+                <Lock className="size-3.5" aria-hidden />
+              </span>
+            </div>
+            <p className="mt-2 font-heading text-[16px] leading-tight font-semibold text-ink">Growth plan</p>
+            <Link
+              href="/app/subscription"
+              className="mt-2 inline-flex items-center text-[11.5px] font-semibold text-primary underline underline-offset-2"
+            >
+              Upgrade to unlock profit reporting
+            </Link>
+            <p className="mt-1 text-[11px] text-muted-foreground">
+              {profitPlan ? `${getPlanConfig(profitPlan).name} and above` : "Higher plans"}
+            </p>
+          </div>
+        )}
         <StatCard label="Transactions today" value={String(Number(today?.count ?? 0))} icon={ReceiptText} />
         <StatCard label="Net revenue · 30 days" value={formatMoney(netRevenue30Days)} icon={CircleDollarSign} />
       </div>

@@ -4,6 +4,7 @@ import { notifications, smsWallets } from "@/lib/db/schema";
 import { requireBusiness } from "@/lib/auth/guards";
 import { ROLE_CATALOG } from "@/lib/permissions";
 import { getPlatformSettings } from "@/lib/platform-settings";
+import { getSubscriptionAccess } from "@/lib/subscription/entitlements";
 import { AppShell } from "@/components/app/app-shell";
 
 /**
@@ -39,6 +40,12 @@ export default async function BusinessLayout({ children }: { children: React.Rea
 
   const unread = Number(unreadResult[0]?.value ?? 0);
   const wallet = Number(walletResult[0]?.credits ?? 0);
+  const access = await getSubscriptionAccess(context.tenant.id);
+  const subscriptionNotice = !access.writable
+    ? { message: access.message, tone: "danger" as const }
+    : access.status === "past_due"
+      ? { message: access.message, tone: "warning" as const }
+      : null;
 
   return (
     <AppShell
@@ -62,6 +69,7 @@ export default async function BusinessLayout({ children }: { children: React.Rea
       maintenance={platform.maintenanceEnabled
         ? { message: platform.maintenanceMessage }
         : null}
+      subscriptionNotice={subscriptionNotice}
     >
       {children}
     </AppShell>

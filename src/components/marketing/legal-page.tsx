@@ -20,7 +20,7 @@ export async function LegalPage({
 
   return (
     <div className="min-h-screen bg-[#f6f7f3]">
-      <MarketingHeader contactEmail="hello@samtechlabs.com" />
+      <MarketingHeader />
 
       <main className="page-container py-14 sm:py-20">
         <div className="mx-auto max-w-3xl">

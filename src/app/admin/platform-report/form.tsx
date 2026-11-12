@@ -4,9 +4,17 @@ import { useState } from "react";
 import { FormError } from "@/components/forms/field";
 import { Button } from "@/components/ui/button";
 
+type PlatformReport = {
+  tenants: number;
+  activeTenants: number;
+  smsSentToday: number;
+  smsFailedToday: number;
+  superAdminNotified: boolean;
+};
+
 export function SendPlatformReportForm() {
   const [serverError, setServerError] = useState<string>();
-  const [result, setResult] = useState<{ ok: boolean; report?: any; error?: string }>();
+  const [result, setResult] = useState<{ ok: boolean; report?: PlatformReport; error?: string }>();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   async function onSubmit() {
@@ -35,7 +43,7 @@ export function SendPlatformReportForm() {
         <div className={`rounded-xl p-4 border ${result.ok ? "border-success-soft bg-success-soft" : "border-destructive-soft bg-destructive-soft"}`}>
           <p className={`text-sm ${result.ok ? "text-success" : "text-destructive"}`}>
             {result.ok
-              ? `Report sent to your phone. Workspaces: ${result.report?.activeWorkspaces} active / ${result.report?.totalWorkspaces} total · SMS sent: ${result.report?.smsSentToday}, failed: ${result.report?.smsFailedToday}`
+              ? `Report sent to your phone. Workspaces: ${result.report?.activeTenants} active / ${result.report?.tenants} total · SMS sent: ${result.report?.smsSentToday}, failed: ${result.report?.smsFailedToday}`
               : result.error}
           </p>
         </div>

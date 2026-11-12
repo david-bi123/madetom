@@ -3,6 +3,8 @@ import { db } from "@/lib/db";
 import { productStock, productVariants, products, variantStock } from "@/lib/db/schema";
 import { requireBusiness } from "@/lib/auth/guards";
 import { FormPageHeader } from "@/components/forms/form-page-header";
+import { FeatureGate } from "@/components/subscription/feature-gate";
+import { hasFeature } from "@/lib/subscription/entitlements";
 import {
   StockTransferForm,
   type StockBranchOption,
@@ -16,6 +18,29 @@ export default async function TransferStockPage() {
   const context = await requireBusiness("inventory.transfer");
   const tenantId = context.tenant.id;
   const branchId = context.activeBranch.id;
+
+  const transferAccess = await hasFeature(tenantId, "inventory.transfer");
+  if (!transferAccess.allowed) {
+    return (
+      <div className="mx-auto max-w-3xl">
+        <FormPageHeader
+          eyebrow={context.activeBranch.name}
+          title="Transfer stock"
+          description="Move units from this branch to another branch in your workspace."
+          backHref="/app/inventory"
+          backLabel="All inventory"
+        />
+        <FeatureGate
+          title="Stock transfers"
+          description={
+            transferAccess.message ??
+            "Moving stock between branches is available on the Business plan."
+          }
+          requiredPlan={transferAccess.requiredPlan}
+        />
+      </div>
+    );
+  }
 
   const rows = await db
     .select({

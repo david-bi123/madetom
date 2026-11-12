@@ -72,7 +72,7 @@ export function SetupSuperAdminForm() {
 
     if (result.fieldErrors) {
       for (const [key, messages] of Object.entries(result.fieldErrors)) {
-        setError(key as any, { type: "server", message: messages[0] });
+        setError(key as keyof SetupValues, { type: "server", message: messages[0] });
       }
     }
     if (result.error && !result.fieldErrors) setServerError(result.error);

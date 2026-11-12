@@ -46,6 +46,9 @@ export const tenants = mysqlTable(
     pricesIncludeTax: boolean("prices_include_tax").notNull().default(true),
     allowPartialPayments: boolean("allow_partial_payments").notNull().default(true),
     status: mysqlEnum("status", ["pending", "active", "suspended"]).notNull().default("pending"),
+    // True when the organisation is billed by the platform team. Exempt
+    // organisations cannot start an online Paystack payment.
+    paymentExempt: boolean("payment_exempt").notNull().default(false),
     onboardingCompletedAt: timestamp("onboarding_completed_at"),
     suspendedReason: text("suspended_reason"),
     createdBy: varchar("created_by", { length: 36 }),
@@ -114,6 +117,7 @@ export const branches = mysqlTable(
   (t) => [
     uniqueIndex("branches_tenant_code_uq").on(t.tenantId, t.code),
     index("branches_tenant_idx").on(t.tenantId),
+    index("branches_tenant_status_idx").on(t.tenantId, t.status),
   ],
 );
 
@@ -146,6 +150,7 @@ export const tenantMemberships = mysqlTable(
     uniqueIndex("memberships_tenant_user_uq").on(t.tenantId, t.userId),
     index("memberships_user_idx").on(t.userId),
     index("memberships_tenant_idx").on(t.tenantId),
+    index("memberships_tenant_status_idx").on(t.tenantId, t.status),
   ],
 );
 
@@ -200,6 +205,7 @@ export const invitations = mysqlTable(
     uniqueIndex("invitations_token_uq").on(t.tokenHash),
     index("invitations_tenant_idx").on(t.tenantId, t.status),
     index("invitations_status_idx").on(t.status),
+    index("invitations_tenant_type_status_idx").on(t.tenantId, t.type, t.status),
   ],
 );
 
@@ -769,12 +775,16 @@ export const subscriptionPlans = mysqlTable("subscription_plans", {
   description: varchar("description", { length: 255 }),
   priceMonthly: decimal("price_monthly", { precision: 12, scale: 2 }).notNull().default("0.00"),
   priceYearly: decimal("price_yearly", { precision: 12, scale: 2 }).notNull().default("0.00"),
+  currency: varchar("currency", { length: 3 }).notNull().default("GHS"),
   maxEmployees: int("max_employees").notNull(),
   maxBranches: int("max_branches").notNull(),
-  maxProducts: int("max_products").notNull(),
+  // null means unlimited products.
+  maxProducts: int("max_products"),
   maxTransactionsPerMonth: int("max_transactions_per_month").notNull(),
   smsCredits: int("sms_credits").notNull().default(0),
-  features: json("features").$type<string[]>(),
+  features: json("features").$type<
+    Array<{ key: string; label: string; group: string; description: string }>
+  >(),
   isActive: boolean("is_active").notNull().default(true),
   sortOrder: int("sort_order").notNull().default(0),
   updatedAt: timestamp("updated_at").notNull().defaultNow().$onUpdate(() => new Date()),
@@ -790,11 +800,28 @@ export const subscriptions = mysqlTable(
     planKey: varchar("plan_key", { length: 40 })
       .notNull()
       .references(() => subscriptionPlans.key),
-    status: mysqlEnum("status", ["trial", "active", "past_due", "cancelled"]).notNull().default("trial"),
+    status: mysqlEnum("status", [
+      "trial",
+      "active",
+      "pending_payment",
+      "past_due",
+      "suspended",
+      "expired",
+      "cancelled",
+    ])
+      .notNull()
+      .default("active"),
     billingCycle: mysqlEnum("billing_cycle", ["monthly", "yearly"]).notNull().default("monthly"),
+    // Amount charged for the current billing period, in major units (GHS).
+    billingAmount: decimal("billing_amount", { precision: 12, scale: 2 })
+      .notNull()
+      .default("0.00"),
+    currency: varchar("currency", { length: 3 }).notNull().default("GHS"),
+    paymentReference: varchar("payment_reference", { length: 120 }),
     trialEndsAt: timestamp("trial_ends_at"),
     currentPeriodStart: timestamp("current_period_start").notNull().defaultNow(),
     currentPeriodEnd: timestamp("current_period_end"),
+    suspendedAt: timestamp("suspended_at"),
     cancelledAt: timestamp("cancelled_at"),
     notes: varchar("notes", { length: 255 }),
     ...timestamps,
@@ -802,6 +829,72 @@ export const subscriptions = mysqlTable(
   (t) => [
     uniqueIndex("subscriptions_tenant_uq").on(t.tenantId),
     index("subscriptions_status_idx").on(t.status),
+    index("subscriptions_period_end_idx").on(t.currentPeriodEnd),
+  ],
+);
+
+/**
+ * Immutable audit trail of every plan/status change made to a subscription.
+ */
+export const subscriptionHistory = mysqlTable(
+  "subscription_history",
+  {
+    id: id(),
+    tenantId: varchar("tenant_id", { length: 36 })
+      .notNull()
+      .references(() => tenants.id, { onDelete: "cascade" }),
+    planKey: varchar("plan_key", { length: 40 }).notNull(),
+    previousPlanKey: varchar("previous_plan_key", { length: 40 }),
+    previousStatus: varchar("previous_status", { length: 20 }),
+    status: varchar("status", { length: 20 }).notNull(),
+    action: varchar("action", { length: 40 }).notNull(),
+    billingAmount: decimal("billing_amount", { precision: 12, scale: 2 })
+      .notNull()
+      .default("0.00"),
+    currency: varchar("currency", { length: 3 }).notNull().default("GHS"),
+    effectiveAt: timestamp("effective_at").notNull().defaultNow(),
+    periodEnd: timestamp("period_end"),
+    actorUserId: varchar("actor_user_id", { length: 36 }),
+    actorName: varchar("actor_name", { length: 120 }),
+    notes: varchar("notes", { length: 255 }),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+  },
+  (t) => [
+    index("subscription_history_tenant_idx").on(t.tenantId, t.createdAt),
+    index("subscription_history_plan_idx").on(t.planKey),
+  ],
+);
+
+/**
+ * Server-verified Paystack payment records. The unique reference is the
+ * idempotency key used by the webhook and the verification callback.
+ */
+export const subscriptionPayments = mysqlTable(
+  "subscription_payments",
+  {
+    id: id(),
+    tenantId: varchar("tenant_id", { length: 36 })
+      .notNull()
+      .references(() => tenants.id, { onDelete: "cascade" }),
+    subscriptionId: varchar("subscription_id", { length: 36 }),
+    planKey: varchar("plan_key", { length: 40 }).notNull(),
+    provider: varchar("provider", { length: 30 }).notNull().default("paystack"),
+    reference: varchar("reference", { length: 120 }).notNull(),
+    providerReference: varchar("provider_reference", { length: 120 }),
+    amount: decimal("amount", { precision: 12, scale: 2 }).notNull(),
+    currency: varchar("currency", { length: 3 }).notNull().default("GHS"),
+    status: mysqlEnum("status", ["pending", "success", "failed", "abandoned"])
+      .notNull()
+      .default("pending"),
+    paidAt: timestamp("paid_at"),
+    failureReason: varchar("failure_reason", { length: 255 }),
+    metadata: json("metadata").$type<Record<string, unknown>>(),
+    ...timestamps,
+  },
+  (t) => [
+    uniqueIndex("subscription_payments_reference_uq").on(t.reference),
+    index("subscription_payments_tenant_idx").on(t.tenantId, t.createdAt),
+    index("subscription_payments_status_idx").on(t.status),
   ],
 );
 

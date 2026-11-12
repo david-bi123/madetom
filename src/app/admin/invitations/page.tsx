@@ -7,6 +7,7 @@ import { PageHeader, EmptyState, StatCard } from "@/components/ui/page-header";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { Button } from "@/components/ui/button";
 import { revokeInvitation } from "@/app/admin/actions";
+import { ResendInvitationButton } from "@/components/admin/resend-invitation-button";
 import { Mail, MailCheck, MailX } from "lucide-react";
 
 /** This screen reads request-time data, so it is a blocking route. */
@@ -99,12 +100,15 @@ export default async function AdminInvitationsPage() {
                       </td>
                       <td className="px-4 py-3 text-right">
                         {row.status === "pending" ? (
-                          <form action={revokeInvitation}>
-                            <input type="hidden" name="invitationId" value={row.id} />
-                            <Button variant="outline" size="sm" type="submit">
-                              Revoke
-                            </Button>
-                          </form>
+                          <div className="flex items-center justify-end gap-2">
+                            <ResendInvitationButton invitationId={row.id} />
+                            <form action={revokeInvitation}>
+                              <input type="hidden" name="invitationId" value={row.id} />
+                              <Button variant="outline" size="sm" type="submit">
+                                Revoke
+                              </Button>
+                            </form>
+                          </div>
                         ) : (
                           <span className="text-[11px] text-muted-foreground">—</span>
                         )}

@@ -11,6 +11,7 @@ import { adjustStock, transferStock } from "@/lib/services/inventory";
 import { notifyStockAdjustment, syncStockLevels } from "@/lib/services/notifications";
 import { formString, zodState, type ActionState } from "@/lib/action-state";
 import { stockAdjustmentSchema, stockTransferSchema } from "@/lib/validation/inventory";
+import { hasFeature } from "@/lib/subscription/entitlements";
 
 export async function adjustStockAction(state: ActionState, formData: FormData): Promise<ActionState> {
   const context = await requireBusiness("inventory.adjust");
@@ -88,6 +89,13 @@ export async function adjustStockAction(state: ActionState, formData: FormData):
 
 export async function transferStockAction(state: ActionState, formData: FormData): Promise<ActionState> {
   const context = await requireBusiness("inventory.transfer");
+
+  const transferAccess = await hasFeature(context.tenant.id, "inventory.transfer");
+  if (!transferAccess.allowed) {
+    return {
+      error: `${transferAccess.message ?? "Stock transfers are not available on your plan."} ${transferAccess.upgradeMessage ?? ""}`.trim(),
+    };
+  }
 
   const parsed = stockTransferSchema.safeParse({
     productId: formString(formData, "productId"),

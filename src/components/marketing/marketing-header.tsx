@@ -7,13 +7,14 @@ import { Logo } from "@/components/brand/logo";
 import { Button } from "@/components/ui/button";
 
 const links = [
-  { href: "#product", label: "Product" },
-  { href: "#operations", label: "Operations" },
-  { href: "#roles", label: "Roles" },
+  { href: "#product", label: "Point of sale" },
+  { href: "#operations", label: "Inventory" },
+  { href: "#reports", label: "Reports" },
   { href: "#pricing", label: "Plans" },
+  { href: "#faq", label: "FAQ" },
 ];
 
-export function MarketingHeader({ contactEmail }: { contactEmail: string }) {
+export function MarketingHeader() {
   const [open, setOpen] = useState(false);
 
   return (
@@ -23,7 +24,7 @@ export function MarketingHeader({ contactEmail }: { contactEmail: string }) {
           <Logo />
         </Link>
 
-        <nav className="hidden items-center gap-7 md:flex" aria-label="Main navigation">
+        <nav className="hidden items-center gap-7 lg:flex" aria-label="Main navigation">
           {links.map((link) => (
             <a
               key={link.href}
@@ -39,12 +40,8 @@ export function MarketingHeader({ contactEmail }: { contactEmail: string }) {
           <Button variant="ghost" size="sm" className="hidden sm:inline-flex" render={<Link href="/login" />} nativeButton={false}>
             Sign in
           </Button>
-          <Button
-            size="sm"
-            className="hidden sm:inline-flex"
-            render={<a href={`mailto:${contactEmail}?subject=Madetom access request`} />}
-           nativeButton={false}>
-            Request access
+          <Button size="sm" className="hidden sm:inline-flex" render={<Link href="/signup" />} nativeButton={false}>
+            Start now
             <ArrowRight className="size-3.5" />
           </Button>
           <button
@@ -53,7 +50,7 @@ export function MarketingHeader({ contactEmail }: { contactEmail: string }) {
             aria-expanded={open}
             aria-controls="mobile-menu"
             aria-label={open ? "Close menu" : "Open menu"}
-            className="flex size-9 items-center justify-center rounded-lg border border-border bg-card text-foreground md:hidden"
+            className="flex size-9 items-center justify-center rounded-lg border border-border bg-card text-foreground lg:hidden"
           >
             {open ? <X className="size-4" /> : <Menu className="size-4" />}
           </button>
@@ -61,7 +58,7 @@ export function MarketingHeader({ contactEmail }: { contactEmail: string }) {
       </div>
 
       {open ? (
-        <div id="mobile-menu" className="border-t border-border bg-[#fbfcf9] px-4 py-3 md:hidden">
+        <div id="mobile-menu" className="border-t border-border bg-[#fbfcf9] px-4 py-3 lg:hidden">
           <nav className="flex flex-col" aria-label="Mobile navigation">
             {links.map((link) => (
               <a
@@ -78,8 +75,8 @@ export function MarketingHeader({ contactEmail }: { contactEmail: string }) {
             <Button variant="outline" size="sm" render={<Link href="/login" />} nativeButton={false}>
               Sign in
             </Button>
-            <Button size="sm" render={<a href={`mailto:${contactEmail}?subject=Madetom access request`} />} nativeButton={false}>
-              Request access
+            <Button size="sm" render={<Link href="/signup" />} nativeButton={false}>
+              Start now
             </Button>
           </div>
         </div>
@@ -87,4 +84,3 @@ export function MarketingHeader({ contactEmail }: { contactEmail: string }) {
     </header>
   );
 }
-

@@ -3,6 +3,7 @@ import { db } from "@/lib/db";
 import { branches } from "@/lib/db/schema";
 import { requireBusiness } from "@/lib/auth/guards";
 import { PageHeader, SectionHeading } from "@/components/ui/page-header";
+import { BranchCreateForm } from "@/components/app/branch-create-form";
 import { BusinessSettingsForm } from "@/components/settings/business-settings-form";
 import { StatusBadge } from "@/components/ui/status-badge";
 
@@ -81,6 +82,8 @@ export default async function SettingsPage() {
             </li>
           ))}
         </ul>
+
+        {canManage && <BranchCreateForm />}
       </section>
     </div>
   );

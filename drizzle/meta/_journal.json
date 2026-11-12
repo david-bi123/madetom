@@ -15,6 +15,20 @@
       "when": 1793951534015,
       "tag": "0001_amazing_ego",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1794489422515,
+      "tag": "0002_dusty_human_fly",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "5",
+      "when": 1794498408198,
+      "tag": "0003_busy_blindfold",
+      "breakpoints": true
     }
   ]
 }

@@ -114,3 +114,36 @@ export const setupStaffSchema = z
     message: "Passwords do not match.",
     path: ["confirmPassword"],
   });
+
+const signupFields = {
+  name: z.string().trim().min(2, "Enter your full name.").max(120),
+  email: emailSchema,
+  phone: phoneSchema,
+  password: passwordSchema,
+  confirmPassword: z.string().min(1, "Confirm your password."),
+  businessName: z.string().trim().min(2, "Enter your business name.").max(160),
+  businessType: z.string().trim().min(2, "Enter your business type.").max(80),
+  region: z.string().trim().min(1, "Select or enter a region.").max(80),
+  location: z.string().trim().min(2, "Enter the business location.").max(255),
+  branchName: z.string().trim().min(2, "Name your main branch.").max(120),
+  planKey: z.enum(["starter", "growth", "business"], {
+    message: "Choose a subscription plan.",
+  }),
+};
+
+export const signupFormSchema = z
+  .object(signupFields)
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords do not match.",
+    path: ["confirmPassword"],
+  });
+
+export const signupSchema = z
+  .object({
+    ...signupFields,
+    acceptTerms: z.literal(true, { message: "You must accept the terms to continue." }),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords do not match.",
+    path: ["confirmPassword"],
+  });

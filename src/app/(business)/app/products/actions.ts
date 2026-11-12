@@ -12,6 +12,7 @@ import { productFormSchema } from "@/lib/validation/product";
 import { variantFormSchema } from "@/lib/validation/variant";
 import { successState, zodState, type ActionState } from "@/lib/action-state";
 import { formString } from "@/lib/action-state";
+import { assertProductCapacity } from "@/lib/subscription/entitlements";
 
 function valuesFromFormData(formData: FormData): Record<string, unknown> {
   const categoryId = formData.get("categoryId");
@@ -55,35 +56,54 @@ export async function createProduct(state: ActionState, formData: FormData): Pro
   if (duplicate) return { error: "A product with this SKU already exists in the workspace." };
 
   const productId = crypto.randomUUID();
-  await db.insert(products).values({
-    id: productId,
-    tenantId: context.tenant.id,
-    categoryId: values.categoryId,
-    supplierId: values.supplierId,
-    name: values.name,
-    sku: values.sku,
-    barcode: values.barcode,
-    description: values.description,
-    imageUrl: values.imageUrl,
-    costPrice: fromMinor(toMinor(values.costPrice)),
-    sellingPrice: fromMinor(toMinor(values.sellingPrice)),
-    reorderLevel: values.reorderLevel,
-    unit: values.unit,
-    taxRate: values.taxRate,
-    hasVariants: values.hasVariants,
-    trackInventory: values.trackInventory,
-    status: values.status,
+
+  // The limit check and insert share one transaction so two concurrent requests
+  // cannot both consume the last available product slot.
+  const capacity = await db.transaction(async (tx) => {
+    const productLimit = await assertProductCapacity(tx, context.tenant.id, 1);
+    if (!productLimit.allowed) return productLimit;
+
+    await tx.insert(products).values({
+      id: productId,
+      tenantId: context.tenant.id,
+      categoryId: values.categoryId,
+      supplierId: values.supplierId,
+      name: values.name,
+      sku: values.sku,
+      barcode: values.barcode,
+      description: values.description,
+      imageUrl: values.imageUrl,
+      costPrice: fromMinor(toMinor(values.costPrice)),
+      sellingPrice: fromMinor(toMinor(values.sellingPrice)),
+      reorderLevel: values.reorderLevel,
+      unit: values.unit,
+      taxRate: values.taxRate,
+      hasVariants: values.hasVariants,
+      trackInventory: values.trackInventory,
+      status: values.status,
+    });
+
+    if (values.trackInventory && values.status === "active") {
+      await tx.insert(productStock).values({
+        id: crypto.randomUUID(),
+        tenantId: context.tenant.id,
+        productId,
+        branchId: context.activeBranch.id,
+        quantity: 0,
+        reorderLevel: values.reorderLevel,
+      });
+    }
+
+    return null;
   });
 
-  if (values.trackInventory && values.status === "active") {
-    await db.insert(productStock).values({
-      id: crypto.randomUUID(),
-      tenantId: context.tenant.id,
-      productId,
-      branchId: context.activeBranch.id,
-      quantity: 0,
-      reorderLevel: values.reorderLevel,
-    });
+  if (capacity && !capacity.allowed) {
+    return {
+      error: capacity.message ?? "Your plan does not allow another product.",
+      fieldErrors: {
+        name: [`${capacity.message ?? ""} ${capacity.upgradeMessage ?? ""}`.trim()],
+      },
+    };
   }
 
   await writeAudit({

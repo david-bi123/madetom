@@ -37,6 +37,7 @@ import {
   permissions as permissionsTable,
 } from "../src/lib/db/schema";
 import { PERMISSION_CATALOG, ROLE_CATALOG, ROLE_KEYS } from "../src/lib/permissions";
+import { PLAN_CONFIGS, PLAN_KEYS } from "../src/lib/subscription/plans";
 
 loadEnvConfig(process.cwd());
 const withDemo = process.argv.includes("--demo");
@@ -87,69 +88,48 @@ async function seedSystem() {
   );
   await db.insert(rolePermissions).values(assignments);
 
-  const planSeeds = [
-    {
-      key: "trial",
-      name: "Free Trial",
-      description: "A complete trial of Madetom for a new business.",
-      priceMonthly: "0.00",
-      priceYearly: "0.00",
-      maxEmployees: 3,
-      maxBranches: 1,
-      maxProducts: 100,
-      maxTransactionsPerMonth: 300,
-      smsCredits: 20,
-      features: ["1 branch", "3 staff accounts", "100 products", "300 sales per month", "20 SMS credits"],
-      sortOrder: 1,
-    },
-    {
-      key: "starter",
-      name: "Starter",
-      description: "For a single shop that is getting organised.",
-      priceMonthly: "99.00",
-      priceYearly: "990.00",
-      maxEmployees: 5,
-      maxBranches: 1,
-      maxProducts: 500,
-      maxTransactionsPerMonth: 2000,
-      smsCredits: 100,
-      features: ["1 branch", "5 staff accounts", "500 products", "2,000 sales per month", "100 SMS credits"],
-      sortOrder: 2,
-    },
-    {
-      key: "business",
-      name: "Business",
-      description: "For growing businesses with more than one location.",
-      priceMonthly: "249.00",
-      priceYearly: "2490.00",
-      maxEmployees: 15,
-      maxBranches: 3,
-      maxProducts: 5000,
-      maxTransactionsPerMonth: 10000,
-      smsCredits: 500,
-      features: ["3 branches", "15 staff accounts", "5,000 products", "10,000 sales per month", "500 SMS credits"],
-      sortOrder: 3,
-    },
-    {
-      key: "premium",
-      name: "Premium",
-      description: "For established retailers and distributors.",
-      priceMonthly: "499.00",
-      priceYearly: "4990.00",
-      maxEmployees: 50,
-      maxBranches: 10,
-      maxProducts: 50000,
-      maxTransactionsPerMonth: 100000,
-      smsCredits: 2000,
-      features: ["10 branches", "50 staff accounts", "50,000 products", "100,000 sales per month", "2,000 SMS credits"],
-      sortOrder: 4,
-    },
-  ];
+  const planSeeds = PLAN_KEYS.map((key) => {
+    const plan = PLAN_CONFIGS[key];
+    return {
+      key: plan.key,
+      name: plan.name,
+      description: plan.description,
+      priceMonthly: (plan.priceMonthly / 100).toFixed(2),
+      priceYearly: ((plan.priceMonthly * 12) / 100).toFixed(2),
+      currency: plan.currency,
+      maxEmployees: plan.maxStaff,
+      maxBranches: plan.maxBranches,
+      maxProducts: plan.maxProducts,
+      maxTransactionsPerMonth: plan.maxTransactionsPerMonth,
+      smsCredits: plan.smsCredits,
+      features: plan.features,
+      isActive: true,
+      sortOrder: plan.sortOrder,
+    };
+  });
 
-  const existingPlans = await db.select({ key: subscriptionPlans.key }).from(subscriptionPlans);
-  const existingKeys = new Set(existingPlans.map((plan) => plan.key));
-  const missingPlans = planSeeds.filter((plan) => !existingKeys.has(plan.key));
-  if (missingPlans.length) await db.insert(subscriptionPlans).values(missingPlans);
+  for (const plan of planSeeds) {
+    await db
+      .insert(subscriptionPlans)
+      .values(plan)
+      .onDuplicateKeyUpdate({
+        set: {
+          name: plan.name,
+          description: plan.description,
+          priceMonthly: plan.priceMonthly,
+          priceYearly: plan.priceYearly,
+          currency: plan.currency,
+          maxEmployees: plan.maxEmployees,
+          maxBranches: plan.maxBranches,
+          maxProducts: plan.maxProducts,
+          maxTransactionsPerMonth: plan.maxTransactionsPerMonth,
+          smsCredits: plan.smsCredits,
+          features: plan.features,
+          isActive: plan.isActive,
+          sortOrder: plan.sortOrder,
+        },
+      });
+  }
 
   const defaults: Array<{ key: string; value: unknown }> = [
     { key: "platform_name", value: "Madetom" },
@@ -391,7 +371,9 @@ async function seedDemo() {
     tenantId,
     planKey: "business",
     status: "active",
-    billingCycle: "yearly",
+    billingCycle: "monthly",
+    billingAmount: "1000.00",
+    currency: "GHS",
     currentPeriodStart: new Date(now.getTime() - 30 * 86400000),
     currentPeriodEnd: new Date(now.getTime() + 335 * 86400000),
     notes: "Demo subscription managed by the platform administrator.",

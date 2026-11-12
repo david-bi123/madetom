@@ -12,6 +12,7 @@ const STATUS_TONES: Record<string, { label: string; tone: StatusTone }> = {
   accepted: { label: "Accepted", tone: "success" },
   delivered: { label: "Delivered", tone: "success" },
   trial: { label: "Trial", tone: "info" },
+  pending_payment: { label: "Awaiting payment", tone: "warning" },
   pending: { label: "Pending", tone: "warning" },
   partial: { label: "Part paid", tone: "warning" },
   draft: { label: "Draft", tone: "neutral" },

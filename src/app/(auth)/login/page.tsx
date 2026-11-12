@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { ShieldCheck } from "lucide-react";
+import Link from "next/link";
+import { ArrowUpRight, ShieldCheck } from "lucide-react";
 import { LoginForm } from "@/components/auth/login-form";
 import { FormSuccess } from "@/components/forms/field";
 
@@ -61,11 +62,18 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
         <div className="flex gap-3">
           <ShieldCheck className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden />
           <div>
-            <p className="text-[13px] font-semibold text-foreground">Access is by invitation</p>
+            <p className="text-[13px] font-semibold text-foreground">New to Madetom?</p>
             <p className="mt-1 text-[12.5px] leading-relaxed text-muted-foreground">
-              Business owners are onboarded by the Madetom team via SMS invitation. Staff accounts
-              are created inside the workspace by an owner or manager.
+              Create your workspace, choose a plan and pay securely with Paystack. Staff accounts
+              are added inside the workspace by an owner or manager.
             </p>
+            <Link
+              href="/signup"
+              className="mt-2.5 inline-flex items-center gap-1 text-[12.5px] font-semibold text-primary hover:underline"
+            >
+              Create a workspace
+              <ArrowUpRight className="size-3.5" aria-hidden />
+            </Link>
           </div>
         </div>
       </div>

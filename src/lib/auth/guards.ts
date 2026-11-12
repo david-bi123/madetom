@@ -56,6 +56,8 @@ const loadBusinessContext = cache(async (): Promise<BusinessContext> => {
   }
 
   if (row.tenant.status === "suspended") redirect("/suspended");
+  // Organisations excluded from online payment are never pushed to checkout.
+  if (row.tenant.status === "pending" && !row.tenant.paymentExempt) redirect("/pending-payment");
   if (!row.tenant.onboardingCompletedAt) redirect("/login?error=setup-incomplete");
 
   const roleKey = row.membership.roleKey as RoleKey;

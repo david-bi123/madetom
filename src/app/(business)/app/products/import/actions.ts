@@ -8,6 +8,7 @@ import { requireBusiness } from "@/lib/auth/guards";
 import { writeAudit } from "@/lib/audit";
 import { fromMinor, toMinor } from "@/lib/format";
 import { formString, successState, type ActionState } from "@/lib/action-state";
+import { assertProductCapacity, hasFeature } from "@/lib/subscription/entitlements";
 
 /** Minimal RFC 4180-style parser: handles quoted cells, commas, and newlines. */
 function parseCsv(text: string): string[][] {
@@ -88,6 +89,17 @@ export async function importProducts(state: ActionState, formData: FormData): Pr
   const tenantId = context.tenant.id;
   const branchId = context.activeBranch.id;
 
+  // Bulk CSV import is a Growth-and-above entitlement.
+  const importFeature = await hasFeature(tenantId, "reports.csvImport");
+  if (!importFeature.allowed) {
+    return {
+      error: importFeature.message ?? "CSV import is not available on your plan.",
+      fieldErrors: {
+        csv: [`${importFeature.message ?? ""} ${importFeature.upgradeMessage ?? ""}`.trim()],
+      },
+    };
+  }
+
   const [existingProducts, categoryRows, supplierRows] = await Promise.all([
     db
       .select({ id: products.id, sku: products.sku })
@@ -113,7 +125,46 @@ export async function importProducts(state: ActionState, formData: FormData): Pr
   const problems: string[] = [];
   const seenSkus = new Set<string>();
 
+  // Enforce product limit: count how many NEW products this import would add,
+  // then verify the organisation has room under its plan limit.
+  const newProductCount = rows.slice(1).filter((cells) => {
+    const name = column(cells, "name");
+    const sku = column(cells, "sku");
+    if (!name || !sku) return false;
+    const skuKey = sku.toLowerCase();
+    return !productBySku.has(skuKey) && !seenSkus.has(skuKey);
+  }).length;
+
+  // Check before opening the transaction so the user gets a precise message.
+  const precheck = newProductCount > 0 ? await assertProductCapacity(db, tenantId, newProductCount) : null;
+  if (precheck && !precheck.allowed) {
+    const remainingSlots = precheck.limit === null ? null : Math.max(0, precheck.limit - precheck.used);
+    if (precheck.reason === "limit_reached" && remainingSlots !== null) {
+      return {
+        error: `This import would add ${newProductCount} new products, but you only have room for ${remainingSlots} more under your ${precheck.planName} plan. Upgrade your plan or reduce the import size.`,
+        fieldErrors: {
+          csv: [`Import limited to ${remainingSlots} new product(s) on your current plan.`],
+        },
+      };
+    }
+    return {
+      error: precheck.message ?? "Your plan does not allow this import.",
+      fieldErrors: { csv: [`${precheck.message ?? ""} ${precheck.upgradeMessage ?? ""}`.trim()] },
+    };
+  }
+
+  let capacityFailure: string | null = null;
   await db.transaction(async (tx) => {
+    // Re-check inside the transaction to close the race between the precheck
+    // and the inserts. The subscription row is locked for the duration.
+    if (newProductCount > 0) {
+      const capacity = await assertProductCapacity(tx, tenantId, newProductCount);
+      if (!capacity.allowed) {
+        capacityFailure = capacity.message ?? "Your plan does not allow this import.";
+        throw new Error("__IMPORT_CAPACITY__");
+      }
+    }
+
     for (let index = 1; index < rows.length; index++) {
       const cells = rows[index];
       const name = column(cells, "name");
@@ -216,7 +267,17 @@ export async function importProducts(state: ActionState, formData: FormData): Pr
         }
       }
     }
+  }).catch((error: unknown) => {
+    if (capacityFailure) return;
+    throw error;
   });
+
+  if (capacityFailure) {
+    return {
+      error: capacityFailure,
+      fieldErrors: { csv: [capacityFailure] },
+    };
+  }
 
   await writeAudit({
     tenantId,
