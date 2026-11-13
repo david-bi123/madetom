@@ -2,7 +2,7 @@
 
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { and, desc, eq, isNull } from "drizzle-orm";
+import { and, asc, desc, eq, isNull } from "drizzle-orm";
 import { db } from "@/lib/db";
 import {
   passwordResetTokens,
@@ -69,9 +69,18 @@ export async function loginAction(formData: FormData): Promise<ActionState> {
     )
     .limit(1);
 
-  // Fallback: try matching by phone if email lookup failed
+  // Fallback: try matching by phone if email lookup failed. One phone number
+  // can belong to more than one account (for example a platform administrator
+  // who also owns a shop), so a business account always wins over a super
+  // admin, and the oldest account wins after that.
   const userToVerify = user ?? (isPhone && normalizedPhone
-    ? await db.select().from(users).where(eq(users.phone, normalizedPhone)).limit(1).then((r) => r[0])
+    ? await db
+        .select()
+        .from(users)
+        .where(eq(users.phone, normalizedPhone))
+        .orderBy(asc(users.isSuperAdmin), asc(users.createdAt))
+        .limit(1)
+        .then((r) => r[0])
     : null);
 
   const passwordValid = await verifyPassword(password, userToVerify?.passwordHash ?? DUMMY_HASH);
