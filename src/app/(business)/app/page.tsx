@@ -160,13 +160,17 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
         .then((rows) => rows[0]),
       db
         .select({
-          day: sql<string>`date_format(${sales.createdAt}, '%Y-%m-%d')`,
+          day: sql<string>`date_format(${sales.createdAt}, '%Y-%m-%d')`.as("day"),
           revenue: sql<string>`coalesce(sum(${sales.total} - ${sales.taxAmount}), 0)`,
           transactions: sql<number>`count(*)`,
         })
         .from(sales)
         .where(and(baseSaleFilter, gte(sales.createdAt, startOfDay(subDays(now, 13)))))
-        .groupBy(sql`date_format(${sales.createdAt}, '%Y-%m-%d')`),
+        // Group by the selected alias. TiDB runs with ONLY_FULL_GROUP_BY and
+        // compares expressions literally, so repeating the date_format() call
+        // (rendered with a table prefix here but without one in the select
+        // list) is rejected as "not in GROUP BY".
+        .groupBy(sql`day`),
       db
         .select({
           id: sales.id,

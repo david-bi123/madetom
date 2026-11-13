@@ -101,7 +101,7 @@ export async function inviteStaff(state: ActionState, formData: FormData): Promi
   const sms = await sendSms({
     tenantId,
     phone: normalizePhone(values.phone),
-    message: `${values.name}, you have been invited to join ${context.tenant.name} on Madetom. Set up your account: ${link} The link expires in ${INVITE_TTL_DAYS} days.`,
+    message: `Madetom: ${values.name}, join ${context.tenant.name} here: ${link} (expires in ${INVITE_TTL_DAYS} days).`,
     displayMessage: `${values.name}, you have been invited to join ${context.tenant.name} on Madetom. Open the secure link to set up your account. Link expires in ${INVITE_TTL_DAYS} days.`,
     purpose: "staff_invitation",
     relatedType: "invitation",

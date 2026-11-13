@@ -71,7 +71,7 @@ export default async function ReportsPage() {
 
   const chartRows = await db
     .select({
-      day: sql<string>`date_format(${sales.createdAt}, '%Y-%m-%d')`,
+      day: sql<string>`date_format(${sales.createdAt}, '%Y-%m-%d')`.as("day"),
       revenue: sql<string>`coalesce(sum(${sales.total} - ${sales.taxAmount}), 0)`,
       transactions: sql<number>`count(*)`,
     })
@@ -84,7 +84,9 @@ export default async function ReportsPage() {
         lte(sales.createdAt, endOfDay(now)),
       ),
     )
-    .groupBy(sql`date_format(${sales.createdAt}, '%Y-%m-%d')`);
+    // TiDB enforces ONLY_FULL_GROUP_BY and matches expressions literally, so
+    // the alias is used instead of repeating date_format() with a table prefix.
+    .groupBy(sql`day`);
 
   const chartMap = new Map(
     chartRows.map((row) => [

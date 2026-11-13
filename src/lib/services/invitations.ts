@@ -139,11 +139,17 @@ export async function resendOwnerInvitation(input: {
     .where(eq(invitations.id, invitation.id));
 
   const link = `${input.appUrl.replace(/\/+$/, "")}/setup/${rawToken}`;
+  // Keep the message inside one SMS segment where possible: long messages get
+  // split (or truncated by some phones), which breaks the link.
+  const expiryLabel = expiresAt.toLocaleDateString("en-GB", {
+    day: "numeric",
+    month: "short",
+  });
   const result = await sendSms({
     tenantId: tenant.id,
     phone: normalizePhone(phone),
-    message: `Welcome to Madetom, ${invitation.name}. Set up ${tenant.name} here: ${link} The link expires in ${input.expiresInDays ?? 14} days.`,
-    displayMessage: `Welcome to Madetom, ${invitation.name}. Set up ${tenant.name} with the secure link. It expires in ${input.expiresInDays ?? 14} days.`,
+    message: `Madetom: finish setting up ${tenant.name} here: ${link} (expires ${expiryLabel}).`,
+    displayMessage: `Madetom: finish setting up ${tenant.name} with the secure link (expires ${expiryLabel}).`,
     purpose: invitation.type === "owner" ? "owner_invitation" : "staff_invitation",
     relatedType: "invitation",
     relatedId: invitation.id,

@@ -158,17 +158,40 @@ export async function completeSetup(formData: FormData): Promise<ActionState> {
           .select({ code: branches.code })
           .from(branches)
           .where(eq(branches.tenantId, tenant.id));
-        const branchId = crypto.randomUUID();
+        const [existingBranch] = await tx
+          .select()
+          .from(branches)
+          .where(eq(branches.tenantId, tenant.id))
+          .orderBy(asc(branches.createdAt))
+          .limit(1);
 
-        await tx.insert(branches).values({
-          id: branchId,
-          tenantId: tenant.id,
-          name: ownerData.branchName,
-          code: branchCode(ownerData.branchName, existingBranches.map((branch) => branch.code)),
-          address: ownerData.branchAddress,
-          phone: normalizePhone(ownerData.phone),
-          isDefault: true,
-        });
+        let branchId: string;
+        if (existingBranch) {
+          // The platform team may already have created the first branch when
+          // the organisation was set up. Reuse it instead of adding a second
+          // "Main branch" with a near-identical name.
+          branchId = existingBranch.id;
+          await tx
+            .update(branches)
+            .set({
+              name: ownerData.branchName,
+              address: ownerData.branchAddress,
+              phone: normalizePhone(ownerData.phone),
+              isDefault: true,
+            })
+            .where(eq(branches.id, branchId));
+        } else {
+          branchId = crypto.randomUUID();
+          await tx.insert(branches).values({
+            id: branchId,
+            tenantId: tenant.id,
+            name: ownerData.branchName,
+            code: branchCode(ownerData.branchName, existingBranches.map((branch) => branch.code)),
+            address: ownerData.branchAddress,
+            phone: normalizePhone(ownerData.phone),
+            isDefault: true,
+          });
+        }
 
         await tx.insert(users).values({
           id: userId,
