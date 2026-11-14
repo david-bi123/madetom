@@ -1,3 +1,4 @@
+import { cookies } from "next/headers";
 import { and, count, eq, isNull, or } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { notifications, smsWallets } from "@/lib/db/schema";
@@ -14,6 +15,10 @@ import { AppShell } from "@/components/app/app-shell";
 
 export default async function BusinessLayout({ children }: { children: React.ReactNode }) {
   const context = await requireBusiness();
+  const cookieStore = await cookies();
+  // The sidebar remembers its collapsed state so the first paint matches what
+  // the user chose on their last visit.
+  const sidebarCollapsed = cookieStore.get("madetom_sidebar")?.value === "collapsed";
 
   const [unreadResult, walletResult, platform] = await Promise.all([
     db
@@ -70,6 +75,7 @@ export default async function BusinessLayout({ children }: { children: React.Rea
         ? { message: platform.maintenanceMessage }
         : null}
       subscriptionNotice={subscriptionNotice}
+      defaultSidebarCollapsed={sidebarCollapsed}
     >
       {children}
     </AppShell>

@@ -1,3 +1,4 @@
+import { cookies } from "next/headers";
 import { count, eq } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { invitations, tenants } from "@/lib/db/schema";
@@ -8,6 +9,10 @@ import { AdminShell } from "@/components/admin/admin-shell";
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const user = await requireSuperAdmin();
+  const cookieStore = await cookies();
+  // Remembered from the last visit so the sidebar paints at the right width.
+  const sidebarCollapsed =
+    cookieStore.get("madetom_admin_sidebar")?.value === "collapsed";
 
   const [pendingInvitations, suspendedOrgs] = await Promise.all([
     db
@@ -27,6 +32,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
       user={{ name: user.name, email: user.email }}
       pendingInvitations={pendingInvitations}
       suspendedOrgs={suspendedOrgs}
+      defaultSidebarCollapsed={sidebarCollapsed}
     >
       {children}
     </AdminShell>
