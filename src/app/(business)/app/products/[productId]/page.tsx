@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { notFound } from "next/navigation";
 import { and, eq } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { productCategories, productVariants, products, suppliers, variantStock } from "@/lib/db/schema";
@@ -22,17 +23,7 @@ export default async function ProductEditPage({ params }: ProductEditPageProps) 
     .where(eq(products.id, productId))
     .limit(1);
 
-  if (!product || product.tenantId !== tenantId) {
-    return (
-      <div className="max-w-xl rounded-xl border border-border bg-card p-8 text-center shadow-[var(--shadow-card)]">
-        <h1 className="font-heading text-[22px] font-semibold">Product not found</h1>
-        <p className="mt-2 text-[13px] text-muted-foreground">It may have been archived or moved to another workspace.</p>
-        <Button render={<Link href="/app/products" />} nativeButton={false} className="mt-6">
-          Back to products
-        </Button>
-      </div>
-    );
-  }
+  if (!product || product.tenantId !== tenantId) notFound();
 
   const [categoryOptions, supplierOptions] = await Promise.all([
     db.select().from(productCategories).where(eq(productCategories.tenantId, tenantId)).orderBy(productCategories.name),

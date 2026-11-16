@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { notFound } from "next/navigation";
 import { and, eq } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { productCategories } from "@/lib/db/schema";
@@ -25,17 +26,7 @@ export default async function CategoryEditPage({ params }: CategoryEditPageProps
     )
     .limit(1);
 
-  if (!category) {
-    return (
-      <div className="max-w-xl rounded-xl border border-border bg-card p-8 text-center shadow-[var(--shadow-card)]">
-        <h1 className="font-heading text-[22px] font-semibold">Category not found</h1>
-        <p className="mt-2 text-[13px] text-muted-foreground">It may have been deleted or moved to another workspace.</p>
-        <Button render={<Link href="/app/categories" />} nativeButton={false} className="mt-6">
-          Back to categories
-        </Button>
-      </div>
-    );
-  }
+  if (!category) notFound();
 
   return (
     <div className="mx-auto max-w-3xl">

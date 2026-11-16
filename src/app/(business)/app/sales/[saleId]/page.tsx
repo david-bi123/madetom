@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { notFound } from "next/navigation";
 import { and, eq } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { customers, saleItems, sales, users } from "@/lib/db/schema";
@@ -24,17 +25,7 @@ export default async function SaleDetailPage({ params }: SaleDetailPageProps) {
     .where(and(eq(sales.id, saleId), eq(sales.tenantId, context.tenant.id), eq(sales.branchId, context.activeBranch.id)))
     .limit(1);
 
-  if (!sale) {
-    return (
-      <div className="max-w-xl rounded-xl border border-border bg-card p-8 text-center shadow-[var(--shadow-card)]">
-        <h1 className="font-heading text-[22px] font-semibold">Receipt not found</h1>
-        <p className="mt-2 text-[13px] text-muted-foreground">This sale is not part of your workspace.</p>
-        <Button render={<Link href="/app/sales" />} className="mt-6" nativeButton={false}>
-          Back to sales
-        </Button>
-      </div>
-    );
-  }
+  if (!sale) notFound();
 
   const items = await db
     .select()
